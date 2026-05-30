@@ -23,16 +23,16 @@ class LessonTemplate:
             section.right_margin = Cm(2.54)
 
         style = self.doc.styles["Normal"]
-        style.font.name = "宋体"
+        style.font.name = "微软雅黑"
         style.font.size = Pt(12)
-        style.element.rPr.rFonts.set(qn("w:eastAsia"), "宋体")
+        style.element.rPr.rFonts.set(qn("w:eastAsia"), "微软雅黑")
         style.paragraph_format.line_spacing = 1.5
 
     def _sf(self, run, size=12, bold=False):
         run.font.size = Pt(size)
         run.bold = bold
-        run.font.name = "宋体"
-        run.element.rPr.rFonts.set(qn("w:eastAsia"), "宋体")
+        run.font.name = "微软雅黑"
+        run.element.rPr.rFonts.set(qn("w:eastAsia"), "微软雅黑")
 
     def title(self, text):
         """标题：22pt 加粗 居中"""

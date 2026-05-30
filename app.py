@@ -17,28 +17,112 @@ st.set_page_config(
     menu_items={"Get Help": None, "Report a Bug": None, "About": None},
 )
 
-# ── 简洁样式 ──
+# ── Open Design 风格样式 ──
 st.markdown("""
 <style>
-.block-container { padding-top: 1.5rem; }
+:root {
+  --bg: oklch(97.5% 0.006 65);
+  --surface: oklch(100% 0 0);
+  --fg: oklch(22% 0.025 35);
+  --muted: oklch(48% 0.018 35);
+  --border: oklch(89% 0.010 55);
+  --accent: oklch(54% 0.16 35);
+  --radius: 14px;
+  --radius-sm: 8px;
+}
+
+.block-container { padding: 1rem 2rem 2rem !important; max-width: 880px !important; }
+#MainMenu { visibility: hidden; }
+footer { visibility: hidden; }
 [data-testid="stDeployButton"] { display: none !important; }
-.stApp { background: #f8f6f3; }
-h1 { color: #3a3a3a; font-weight: 600; }
+.stApp { background: var(--bg); }
+
+/* 标题 */
+h1 { font-weight: 600; color: var(--fg); letter-spacing: -0.02em; }
+h1:first-of-type { font-size: 28px; margin-bottom: 4px; }
+.stMarkdown p { font-size: 14px; color: var(--muted); margin-top: 4px; }
+
+/* 侧边栏 */
+section[data-testid="stSidebar"] {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+}
+section[data-testid="stSidebar"] > div { padding: 1.5rem 1.2rem; }
+section[data-testid="stSidebar"] .stMarkdown h2 {
+  font-size: 11px; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.07em; color: var(--muted); margin: 0 0 12px;
+}
+section[data-testid="stSidebar"] hr { margin: 16px 0; border-color: var(--border); }
+
+/* 输入框 */
+.stTextInput>div>div>input, .stTextArea textarea {
+  padding: 10px 14px !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-sm) !important;
+  font-size: 14px !important;
+  background: var(--bg) !important;
+  color: var(--fg) !important;
+  transition: border 0.15s, box-shadow 0.15s;
+}
+.stTextInput>div>div>input:focus, .stTextArea textarea:focus {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px oklch(54% 0.16 35 / 0.12) !important;
+}
+
+/* 下拉框 */
+.stSelectbox>div>div {
+  border-radius: var(--radius-sm) !important;
+  border: 1px solid var(--border) !important;
+}
+.stSelectbox>div>div:focus-within {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 3px oklch(54% 0.16 35 / 0.12) !important;
+}
+
+/* 按钮 */
 .stButton>button {
-    background: #c0a87a !important;
-    color: #fff !important;
-    border: none !important;
-    border-radius: 8px !important;
+  background: linear-gradient(135deg, var(--accent), oklch(60% 0.18 28)) !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 30px !important;
+  padding: 12px 36px !important;
+  font-weight: 600 !important;
+  font-size: 15px !important;
+  box-shadow: 0 4px 18px oklch(54% 0.16 35 / 0.25) !important;
+  transition: transform 0.15s, box-shadow 0.15s !important;
 }
 .stButton>button:hover {
-    background: #b09868 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 24px oklch(54% 0.16 35 / 0.32) !important;
 }
-.stTextInput input, .stTextArea textarea {
-    border-radius: 8px !important;
-    border: 1px solid #e0dcd5 !important;
+
+/* 文件上传 */
+.stFileUploader>div {
+  border: 2px dashed var(--border) !important;
+  border-radius: var(--radius) !important;
+  padding: 2rem !important;
+  background: var(--surface) !important;
+  transition: all 0.2s;
 }
-.stAlert { border-radius: 8px !important; border: none !important; }
-.stProgress > div > div > div > div { background: #c0a87a !important; }
+.stFileUploader>div:hover { border-color: var(--accent) !important; background: oklch(54% 0.16 35 / 0.03) !important; }
+
+/* 提示框 */
+.stAlert { border-radius: var(--radius-sm) !important; border: none !important; }
+
+/* 进度条 */
+.stProgress > div > div > div > div { background: var(--accent) !important; }
+
+/* radio / checkbox */
+.stRadio label, .stCheckbox label { font-size: 14px !important; }
+
+/* caption */
+.stCaption { font-size: 12px !important; color: var(--muted) !important; }
+
+/* 分割线 */
+hr { margin: 1rem 0; border: 0; border-top: 1px solid var(--border); }
+
+/* 成功提示 */
+.stSuccess { border-radius: var(--radius-sm) !important; border: none !important; }
 </style>
 """, unsafe_allow_html=True)
 

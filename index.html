@@ -1,0 +1,1306 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>美术教案生成器</title>
+  <style>
+    :root {
+      --bg:       oklch(97.5% 0.006 65);
+      --surface:  oklch(100% 0 0);
+      --fg:       oklch(22% 0.025 35);
+      --muted:    oklch(48% 0.018 35);
+      --border:   oklch(89% 0.010 55);
+      --accent:   oklch(54% 0.16 35);
+      --accent-2: oklch(68% 0.10 55);
+      --success:  oklch(58% 0.14 160);
+      --warn:     oklch(65% 0.14 65);
+
+      --font-display: 'Söhne', 'Avenir Next', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+      --font-body:    'PingFang SC', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      --radius: 14px;
+      --radius-sm: 8px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--fg);
+      font: 15px/1.6 var(--font-body);
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+    }
+
+    /* ── Layout ─────────────────────────────── */
+    .app { display: flex; min-height: 100vh; }
+
+    /* ── Sidebar ────────────────────────────── */
+    .sidebar {
+      width: 300px;
+      min-width: 300px;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 32px 24px;
+      gap: 26px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 10;
+      transition: width 0.3s, min-width 0.3s, padding 0.3s, border 0.3s;
+    }
+    .sidebar.collapsed {
+      width: 0;
+      min-width: 0;
+      padding: 32px 0;
+      border-right: none;
+      overflow: hidden;
+    }
+    .sidebar-collapse-btn {
+      position: absolute;
+      top: 20px;
+      right: 12px;
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+      font-size: 14px;
+      color: var(--muted);
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .sidebar-collapse-btn:hover {
+      background: var(--bg);
+      color: var(--fg);
+      border-color: var(--muted);
+    }
+    .sidebar.collapsed .sidebar-collapse-btn { display: none; }
+    .sidebar-expand-tab {
+      display: none;
+      position: fixed;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 11;
+      width: 38px;
+      height: 72px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: none;
+      border-radius: 0 13px 13px 0;
+      cursor: pointer;
+      box-shadow: 2px 0 14px rgba(0,0,0,0.07);
+      transition: background 0.15s, width 0.2s, box-shadow 0.2s;
+      overflow: hidden;
+    }
+    .sidebar-expand-tab::before {
+      content: '';
+      display: block;
+      width: 8px;
+      height: 8px;
+      border-right: 2px solid var(--muted);
+      border-top: 2px solid var(--muted);
+      transform: rotate(45deg);
+      margin-left: -2px;
+      transition: border-color 0.15s;
+    }
+    .sidebar-expand-tab:hover {
+      background: oklch(54% 0.16 35 / 0.06);
+      width: 44px;
+      box-shadow: 2px 0 22px rgba(0,0,0,0.12);
+    }
+    .sidebar-expand-tab:hover::before {
+      border-color: var(--accent);
+    }
+    .sidebar-expand-tab.visible { display: grid; place-items: center; }
+
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-brand .logo {
+      width: 42px; height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent), oklch(64% 0.18 30));
+      display: grid; place-items: center;
+      color: #fff;
+      font-size: 20px;
+    }
+    .sidebar-brand h1 {
+      font: 600 18px/1.3 var(--font-display);
+      letter-spacing: -0.01em;
+    }
+    .sidebar-brand .ver {
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 400;
+      margin-top: 2px;
+    }
+
+    .sidebar-section { display: flex; flex-direction: column; gap: 8px; }
+    .sidebar-section > label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      color: var(--muted);
+    }
+
+    .sidebar select,
+    .sidebar input[type="password"],
+    .sidebar input[type="text"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font: 14px var(--font-body);
+      color: var(--fg);
+      background: var(--bg);
+      outline: none;
+      transition: border 0.15s, box-shadow 0.15s;
+    }
+    .sidebar select:focus,
+    .sidebar input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px oklch(54% 0.16 35 / 0.12);
+    }
+
+    .model-info {
+      background: oklch(54% 0.16 35 / 0.05);
+      border-radius: var(--radius-sm);
+      padding: 10px 12px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    .model-info .model-id {
+      font: 600 13px var(--font-body);
+      color: var(--fg);
+      display: inline;
+      margin-bottom: 3px;
+    }
+    .model-badge {
+      display: none;
+      margin-left: 8px;
+      padding: 1px 8px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #fff;
+      background: var(--accent);
+      border-radius: 4px;
+      vertical-align: middle;
+    }
+    .model-badge.show { display: inline; }
+
+    .api-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .api-row input { flex: 1; }
+    .btn-icon {
+      width: 38px; height: 38px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      cursor: pointer;
+      display: grid; place-items: center;
+      font-size: 15px;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .btn-icon:hover { background: var(--bg); border-color: var(--accent); }
+    .btn-icon.saved { background: oklch(54% 0.16 35 / 0.08); border-color: var(--accent); }
+    .api-link {
+      font-size: 11px;
+      color: var(--accent);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .api-link:hover { text-decoration: underline; }
+    .api-note {
+      margin-top: 6px;
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.01em;
+    }
+
+    .radio-group { display: flex; gap: 8px; }
+    .radio-chip {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      text-align: center;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+      user-select: none;
+    }
+    .radio-chip:hover { background: var(--bg); }
+    .radio-chip.selected {
+      border-color: var(--accent);
+      background: oklch(54% 0.16 35 / 0.06);
+      font-weight: 600;
+      color: var(--accent);
+    }
+    .radio-chip input { display: none; }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    /* ── Hamburger ──────────────────────────── */
+    .hamburger {
+      display: none;
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 20;
+      width: 42px; height: 42px;
+      border-radius: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      cursor: pointer;
+      font-size: 20px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    }
+    .sidebar-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.25);
+      z-index: 9;
+    }
+
+    /* ── Main ────────────────────────────────── */
+    .main {
+      flex: 1;
+      max-width: 840px;
+      margin: 0 auto;
+      padding: 40px 48px 60px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+      width: 100%;
+    }
+
+    .main-header h2 {
+      font: 600 28px/1.3 var(--font-display);
+      letter-spacing: -0.02em;
+    }
+    .main-header p {
+      font-size: 14px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .form-field {
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .form-field.full { grid-column: 1 / -1; }
+    .form-field label {
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .form-field label .optional {
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--muted);
+    }
+    .form-field input,
+    .form-field textarea {
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font: 14px var(--font-body);
+      color: var(--fg);
+      background: var(--surface);
+      outline: none;
+      transition: border 0.15s, box-shadow 0.15s;
+    }
+    .form-field input:focus,
+    .form-field textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px oklch(54% 0.16 35 / 0.12);
+    }
+    .form-field textarea { min-height: 80px; resize: vertical; }
+
+    /* ── Upload ───────────────────────────────── */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 36px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--surface);
+    }
+    .upload-zone:hover,
+    .upload-zone.drag-over {
+      border-color: var(--accent);
+      background: oklch(54% 0.16 35 / 0.03);
+    }
+    .upload-zone.has-image { border-style: solid; padding: 16px; }
+    .upload-icon-svg {
+      width: 48px; height: 48px;
+      color: var(--accent);
+      opacity: 0.7;
+    }
+    .upload-text { font-size: 14px; color: var(--muted); }
+    .upload-text strong { color: var(--accent); font-weight: 600; }
+    .upload-hint { font-size: 12px; color: var(--muted); }
+
+    .upload-preview {
+      display: flex; align-items: center; gap: 16px;
+      width: 100%;
+    }
+    .upload-preview img {
+      width: 100px; height: 75px;
+      object-fit: cover;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+    }
+    .upload-preview .meta {
+      flex: 1;
+      display: flex; flex-direction: column; gap: 4px;
+      min-width: 0;
+    }
+    .upload-preview .meta .name {
+      font-weight: 600; font-size: 14px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .upload-preview .meta .size {
+      font-size: 12px; color: var(--muted);
+    }
+    .upload-preview .remove {
+      padding: 6px 14px;
+      font-size: 12px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--surface);
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+    .upload-preview .remove:hover {
+      border-color: oklch(54% 0.16 22);
+      color: oklch(54% 0.16 22);
+    }
+
+    /* ── Toggle switch ────────────────────────── */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .toggle {
+      width: 44px; height: 26px;
+      border-radius: 13px;
+      background: var(--border);
+      cursor: pointer;
+      transition: background 0.2s;
+      position: relative;
+      flex-shrink: 0;
+    }
+    .toggle.on { background: var(--accent); }
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: #fff;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+    .toggle.on::after { transform: translateX(18px); }
+    .toggle-label {
+      font-size: 13px;
+      font-weight: 500;
+    }
+
+    /* ── Generate button ─────────────────────── */
+    .btn-generate {
+      padding: 16px 48px;
+      font: 600 16px/1 var(--font-display);
+      letter-spacing: -0.01em;
+      color: #fff;
+      background: linear-gradient(135deg, var(--accent), oklch(60% 0.18 28));
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s;
+      box-shadow: 0 4px 18px oklch(54% 0.16 35 / 0.25);
+      align-self: flex-start;
+    }
+    .btn-generate:hover { transform: translateY(-1px); box-shadow: 0 6px 24px oklch(54% 0.16 35 / 0.32); }
+    .btn-generate:active { transform: translateY(0); }
+    .btn-generate:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    .btn-generate.loading { pointer-events: none; opacity: 0.85; }
+
+    /* ── Usage guide collapsible ─────────────── */
+    .guide {
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      overflow: hidden;
+    }
+    .guide-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s;
+    }
+    .guide-header:hover { background: var(--bg); }
+    .guide-header h3 {
+      font: 600 15px/1 var(--font-display);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .guide-arrow {
+      transition: transform 0.25s;
+      font-size: 14px;
+      color: var(--muted);
+    }
+    .guide.open .guide-arrow { transform: rotate(180deg); }
+    .guide-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    .guide.open .guide-body { max-height: 600px; }
+    .guide-content {
+      padding: 0 20px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .guide-steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .guide-step {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+    .guide-step .step-num {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: oklch(54% 0.16 35 / 0.1);
+      color: var(--accent);
+      display: grid; place-items: center;
+      font-size: 13px; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .guide-step .step-text { font-size: 13px; line-height: 1.5; color: var(--muted); }
+    .guide-step .step-text strong { color: var(--fg); }
+    .guide-faq {
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .guide-faq dt { font-size: 13px; font-weight: 600; }
+    .guide-faq dd { font-size: 12px; color: var(--muted); margin: 0 0 4px; }
+
+    /* ── Result area ─────────────────────────── */
+    .result-area { display: none; }
+    .result-area.visible { display: block; }
+
+    .result-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .result-card-header {
+      padding: 18px 24px;
+      background: linear-gradient(135deg, oklch(54% 0.16 35 / 0.05), oklch(68% 0.10 55 / 0.04));
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .result-card-header .badge {
+      font-size: 11px; font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: var(--success);
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .result-card-header h3 {
+      font: 600 17px/1.3 var(--font-display);
+      letter-spacing: -0.01em;
+    }
+    .result-card-body {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .result-section h4 {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .result-section p,
+    .result-section ul {
+      font-size: 14px;
+      line-height: 1.7;
+    }
+    .result-section ul { padding-left: 20px; }
+    .result-section ul li { margin-bottom: 6px; }
+    .result-section .editable {
+      border: 1px dashed transparent;
+      border-radius: 4px;
+      padding: 4px 8px;
+      margin: -4px -8px;
+      transition: border 0.15s;
+    }
+    .result-section .editable.editing {
+      border-color: var(--accent);
+      background: oklch(54% 0.16 35 / 0.03);
+      outline: none;
+    }
+
+    .tag-row { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tag {
+      font-size: 12px;
+      padding: 4px 14px;
+      border-radius: 20px;
+      background: oklch(68% 0.10 55 / 0.12);
+      color: oklch(40% 0.08 55);
+      font-weight: 500;
+    }
+
+    .result-actions {
+      display: flex; gap: 10px;
+      padding: 0 24px 24px;
+      flex-wrap: wrap;
+    }
+    .btn-secondary {
+      padding: 10px 22px;
+      font-size: 13px; font-weight: 500;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      background: var(--surface);
+      color: var(--fg);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-secondary:hover { background: var(--bg); border-color: var(--muted); }
+    .btn-secondary.primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .btn-secondary.primary:hover { opacity: 0.9; }
+
+    /* ── Toast ────────────────────────────────── */
+    .toast {
+      position: fixed; bottom: 32px; left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 28px;
+      background: oklch(22% 0.025 35);
+      color: #fff;
+      border-radius: 30px;
+      font-size: 13px;
+      font-weight: 500;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+    .toast.show { opacity: 1; }
+
+    /* ── Loading dots ─────────────────────────── */
+    @keyframes dotPulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+    .loading-dots { display: inline-flex; gap: 4px; align-items: center; }
+    .loading-dots span {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      animation: dotPulse 1.2s infinite;
+    }
+    .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    /* ── Responsive ───────────────────────────── */
+    @media (max-width: 860px) {
+      .app { flex-direction: column; }
+
+      .sidebar {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        max-width: 340px;
+        min-width: 300px;
+        height: 100vh;
+        transform: translateX(0);
+        z-index: 15;
+        box-shadow: 4px 0 30px rgba(0,0,0,0.1);
+      }
+      .sidebar.collapsed,
+      .sidebar:not(.open) { transform: translateX(-100%); }
+      .sidebar.collapsed { width: 0; min-width: 0; padding: 32px 0; }
+
+      .hamburger { display: grid; place-items: center; position: fixed; top: 16px; right: 16px; left: auto; }
+      .hamburger span { display: block; }
+      .sidebar-overlay.show { display: block; }
+      .sidebar-collapse-btn { display: none; }
+      .sidebar-expand-tab { display: none !important; }
+
+      .main { padding: 24px 20px 40px; }
+      .form-grid { grid-template-columns: 1fr; }
+
+      .guide-steps { grid-template-columns: 1fr; }
+      .btn-generate { width: 100%; justify-content: center; display: flex; }
+      .main-header h2 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ═══════ Hamburger (mobile) ═══════ -->
+  <button class="hamburger" id="btn-hamburger" aria-label="关闭侧边栏"><span>✕</span></button>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- ═══════ SIDEBAR ═══════ -->
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-collapse-btn" id="btn-collapse-sidebar" title="收起侧边栏" aria-label="收起侧边栏">◂</button>
+    <div class="sidebar-brand">
+      <div class="logo">🎨</div>
+      <div>
+        <h1>美术教案生成器</h1>
+        <div class="ver">AI 驱动 · 教案自动化</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <label>模型选择</label>
+      <select id="model-select">
+        <option value="qwen">通义千问 (Qwen-VL)（推荐）</option>
+        <option value="glm">智谱 GLM-5V</option>
+        <option value="mimo">小米 MiMo</option>
+        <option value="kimi">Moonshot Kimi-VL</option>
+      </select>
+      <div class="model-info" id="model-info">
+        <span class="model-id" id="model-id">qwen3-vl-plus</span><span class="model-badge show" id="model-badge">推荐</span>
+        <span id="model-desc">通义千问多模态视觉模型，支持高精度图像理解与教案生成</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <label>API 密钥</label>
+      <div class="api-row">
+        <input type="password" id="api-key" placeholder="输入 API 密钥…" />
+        <button class="btn-icon" id="btn-save-key" title="记住密钥" aria-label="记住密钥">💾</button>
+        <button class="btn-icon" id="btn-clear-key" title="清除密钥" aria-label="清除密钥">🗑</button>
+      </div>
+      <a class="api-link" id="api-link" href="https://dashscope.aliyun.com/" target="_blank" rel="noopener">
+        获取 API 密钥 ↗
+      </a>
+      <div class="api-note">🔒 密钥仅存储在本地浏览器中，不会被上传或分享</div>
+    </div>
+
+    <div class="sidebar-section">
+      <label>输出格式</label>
+      <div class="radio-group" id="format-group">
+        <label class="radio-chip selected" data-value="docx">
+          <input type="radio" name="format" value="docx" checked />
+          Word · .docx
+        </label>
+        <label class="radio-chip" data-value="pdf">
+          <input type="radio" name="format" value="pdf" />
+          PDF · .pdf
+        </label>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <label>适用班级</label>
+      <input type="text" id="class-level" placeholder="例如：启蒙班、初级班…" />
+    </div>
+
+    <div class="sidebar-section">
+      <label>课时</label>
+      <input type="text" id="duration" placeholder="例如：45分钟" value="90分钟" />
+    </div>
+
+    <div class="sidebar-section">
+      <label>输出文件名</label>
+      <input type="text" id="filename" placeholder="教案文档" value="教案文档" />
+    </div>
+
+    <div class="sidebar-footer">
+      <div>教案模板 v2.1</div>
+      <div>支持 启蒙班 / 初级班 / 中级班 / 高级班</div>
+    </div>
+  </aside>
+  <div class="sidebar-expand-tab" id="sidebar-expand-tab" title="展开侧边栏" aria-label="展开侧边栏"></div>
+
+  <!-- ═══════ MAIN ═══════ -->
+  <main class="main" id="main-content">
+    <div class="main-header">
+      <h2>创建新教案</h2>
+      <p>上传学生美术作品，AI 自动分析画面内容并生成结构化教案</p>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-field full">
+        <label>教案主题 <span class="optional">（选填，留空 AI 自动识别）</span></label>
+        <input type="text" id="topic" placeholder="例如：色彩对比练习、素描明暗关系、水彩花卉写生…" />
+      </div>
+      <div class="form-field full">
+        <label>绘画材料 <span class="optional">（选填，留空 AI 自动识别）</span></label>
+        <input type="text" id="materials" placeholder="例如：水彩颜料、8开素描纸、铅笔、橡皮…" />
+      </div>
+      <div class="form-field full">
+        <label>创意提示词 <span class="optional">（选填，对教案的额外要求）</span></label>
+        <textarea id="creative-prompt" placeholder="例如：侧重色彩搭配教学、加入名画赏析环节…" rows="2"></textarea>
+      </div>
+    </div>
+
+    <div class="form-field">
+      <label>参考图片 <span class="optional">（推荐必填）</span></label>
+      <div class="upload-zone" id="upload-zone">
+        <svg class="upload-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="2" width="20" height="20" rx="3" />
+          <circle cx="8.5" cy="8.5" r="1.5" />
+          <path d="M2 16l4.5-4.5 3 3L14 10l8 8" />
+        </svg>
+        <div class="upload-text">拖拽图片到此处，或 <strong>点击选择文件</strong></div>
+        <div class="upload-hint">JPG / PNG / WebP，最大 20MB</div>
+        <input type="file" id="file-input" accept="image/*" hidden />
+      </div>
+    </div>
+
+    <div class="toggle-row">
+      <div class="toggle" id="toggle-edit"></div>
+      <span class="toggle-label">手动编辑生成结果</span>
+    </div>
+
+    <button class="btn-generate" id="btn-generate">生成教案</button>
+
+    <!-- ═══════ Usage guide ═══════ -->
+    <div class="guide" id="guide">
+      <div class="guide-header" id="guide-header">
+        <h3>📖 使用说明</h3>
+        <span class="guide-arrow">▾</span>
+      </div>
+      <div class="guide-body">
+        <div class="guide-content">
+          <div class="guide-steps">
+            <div class="guide-step">
+              <span class="step-num">1</span>
+              <span class="step-text"><strong>上传作品</strong><br />拖拽或点击上传学生美术作品图片</span>
+            </div>
+            <div class="guide-step">
+              <span class="step-num">2</span>
+              <span class="step-text"><strong>配置参数</strong><br />在侧边栏选择模型、填写班级和课时信息</span>
+            </div>
+            <div class="guide-step">
+              <span class="step-num">3</span>
+              <span class="step-text"><strong>一键生成</strong><br />点击生成按钮，AI 自动分析并输出教案</span>
+            </div>
+          </div>
+          <dl class="guide-faq">
+            <dt>不填主题会怎样？</dt>
+            <dd>AI 会根据上传的图片自动识别绘画主题和技法，自动生成教案标题。</dd>
+            <dt>支持哪些 AI 模型？</dt>
+            <dd>通义千问、GLM-5V、小米 MiMo、Kimi-VL，建议使用多模态视觉模型以获得最佳效果。</dd>
+            <dt>API 密钥安全吗？</dt>
+            <dd>密钥仅存储在您本地浏览器的 localStorage 中，不会被上传或分享。</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════ Result ═══════ -->
+    <div class="result-area" id="result-area">
+      <div class="result-card">
+        <div class="result-card-header">
+          <span class="badge">已生成</span>
+          <h3 id="result-title">教案标题</h3>
+        </div>
+        <div class="result-card-body">
+          <div class="result-section">
+            <h4>教学目标</h4>
+            <p class="editable" id="result-objectives"></p>
+          </div>
+          <div class="result-section">
+            <h4>教学重难点</h4>
+            <ul id="result-key-points"></ul>
+          </div>
+          <div class="result-section">
+            <h4>教学步骤</h4>
+            <ul id="result-steps"></ul>
+          </div>
+          <div class="result-section">
+            <h4>所需材料</h4>
+            <div class="tag-row" id="result-material-tags"></div>
+          </div>
+        </div>
+        <div class="result-actions">
+          <button class="btn-secondary primary" id="btn-download">下载教案文档</button>
+          <button class="btn-secondary" id="btn-copy">复制文字内容</button>
+          <button class="btn-secondary" id="btn-regenerate">重新生成</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  // ── State ────────────────────────────────────
+  const models = {
+    qwen:  { id: 'qwen3-vl-plus',  desc: '通义千问多模态视觉模型，支持高精度图像理解与教案生成', link: 'https://dashscope.aliyun.com/' },
+    glm:   { id: 'glm-5v',         desc: '智谱 GLM-5V 视觉语言模型，支持图文理解与结构化输出',   link: 'https://open.bigmodel.cn/' },
+    mimo:  { id: 'mimo-vl',        desc: '小米 MiMo 多模态模型，轻量高效，适合教案场景',          link: 'https://platform.moonshot.cn/' },
+    kimi:  { id: 'kimi-vl-plus',   desc: 'Kimi 视觉语言模型，支持精细画面分析与长文本输出',        link: 'https://platform.moonshot.cn/' }
+  };
+
+  let uploadedFile = null;
+  let editMode = false;
+  let lastPlan = null;
+
+  // ── DOM refs ────────────────────────────────
+  const sidebar         = document.getElementById('sidebar');
+  const btnCollapse     = document.getElementById('btn-collapse-sidebar');
+  const btnHamburger    = document.getElementById('btn-hamburger');
+  const expandTab       = document.getElementById('sidebar-expand-tab');
+  const overlay         = document.getElementById('sidebar-overlay');
+  const modelSelect     = document.getElementById('model-select');
+  const modelId         = document.getElementById('model-id');
+  const modelDesc       = document.getElementById('model-desc');
+  const apiKey          = document.getElementById('api-key');
+  const btnSaveKey      = document.getElementById('btn-save-key');
+  const btnClearKey     = document.getElementById('btn-clear-key');
+  const apiLink         = document.getElementById('api-link');
+  const formatGroup     = document.getElementById('format-group');
+  const uploadZone      = document.getElementById('upload-zone');
+  const fileInput       = document.getElementById('file-input');
+  const toggleEdit      = document.getElementById('toggle-edit');
+  const btnGenerate     = document.getElementById('btn-generate');
+  const resultArea      = document.getElementById('result-area');
+  const guideHeader     = document.getElementById('guide-header');
+  const guide           = document.getElementById('guide');
+  const toastEl         = document.getElementById('toast');
+  const topicInput      = document.getElementById('topic');
+  const modelBadge      = document.getElementById('model-badge');
+
+  let sidebarOpen = true;
+
+  // ── Desktop sidebar collapse ────────────────
+  function isMobile() { return window.innerWidth <= 860; }
+
+  function collapseSidebar() {
+    sidebarOpen = false;
+    sidebar.classList.add('collapsed');
+    expandTab.classList.add('visible');
+    try { localStorage.setItem('art-lesson:sidebar', 'collapsed'); } catch (_) {}
+  }
+  function expandSidebar() {
+    sidebarOpen = true;
+    sidebar.classList.remove('collapsed');
+    expandTab.classList.remove('visible');
+    try { localStorage.setItem('art-lesson:sidebar', 'open'); } catch (_) {}
+  }
+
+  btnCollapse.addEventListener('click', collapseSidebar);
+  expandTab.addEventListener('click', expandSidebar);
+
+  // ── Mobile sidebar ──────────────────────────
+  function openSidebar()  {
+    sidebarOpen = true;
+    sidebar.classList.add('open');
+    sidebar.classList.remove('collapsed');
+    overlay.classList.add('show');
+    expandTab.classList.remove('visible');
+    btnHamburger.querySelector('span').textContent = '✕';
+  }
+  function closeSidebar() {
+    sidebarOpen = false;
+    sidebar.classList.remove('open');
+    sidebar.classList.add('collapsed');
+    overlay.classList.remove('show');
+    expandTab.classList.add('visible');
+    btnHamburger.querySelector('span').textContent = '☰';
+  }
+  btnHamburger.addEventListener('click', function () {
+    if (isMobile()) {
+      if (sidebar.classList.contains('open')) closeSidebar(); else openSidebar();
+    }
+  });
+  overlay.addEventListener('click', closeSidebar);
+  sidebar.addEventListener('click', function (e) {
+    if (e.target.tagName === 'A') closeSidebar();
+  });
+
+  // Restore desktop sidebar state from localStorage
+  if (!isMobile()) {
+    try {
+      const saved = localStorage.getItem('art-lesson:sidebar');
+      if (saved === 'collapsed') collapseSidebar();
+    } catch (_) {}
+  }
+
+  // On window resize, sync mobile/desktop states
+  window.addEventListener('resize', function () {
+    if (isMobile()) {
+      expandTab.classList.remove('visible');
+      if (sidebarOpen) openSidebar(); else closeSidebar();
+    } else {
+      overlay.classList.remove('show');
+      sidebar.classList.remove('open');
+      if (sidebarOpen) expandSidebar(); else collapseSidebar();
+    }
+  });
+
+  // ── Model switch ────────────────────────────
+  modelSelect.addEventListener('change', function () {
+    const m = models[this.value];
+    modelId.textContent   = m.id;
+    modelDesc.textContent = m.desc;
+    apiLink.href          = m.link;
+    modelBadge.classList.toggle('show', this.value === 'qwen');
+  });
+
+  // ── API key persistence ─────────────────────
+  const KEY_STORE = 'art-lesson-gen:api-key';
+  try {
+    const saved = localStorage.getItem(KEY_STORE);
+    if (saved) {
+      apiKey.value = saved;
+      btnSaveKey.classList.add('saved');
+    }
+  } catch (_) {}
+
+  btnSaveKey.addEventListener('click', function () {
+    const val = apiKey.value.trim();
+    if (!val) return;
+    try { localStorage.setItem(KEY_STORE, val); } catch (_) {}
+    btnSaveKey.classList.add('saved');
+    showToast('API 密钥已保存到本地');
+  });
+  btnClearKey.addEventListener('click', function () {
+    apiKey.value = '';
+    try { localStorage.removeItem(KEY_STORE); } catch (_) {}
+    btnSaveKey.classList.remove('saved');
+    showToast('API 密钥已清除');
+  });
+
+  // ── Format radio ────────────────────────────
+  formatGroup.addEventListener('click', function (e) {
+    const chip = e.target.closest('.radio-chip');
+    if (!chip) return;
+    this.querySelectorAll('.radio-chip').forEach(c => c.classList.remove('selected'));
+    chip.classList.add('selected');
+    chip.querySelector('input').checked = true;
+  });
+
+  // ── Edit mode toggle ────────────────────────
+  toggleEdit.addEventListener('click', function () {
+    editMode = !editMode;
+    toggleEdit.classList.toggle('on', editMode);
+    if (editMode) {
+      makeResultEditable();
+      showToast('编辑模式已开启，点击教案内容即可修改');
+    } else {
+      makeResultReadonly();
+      showToast('编辑模式已关闭');
+    }
+  });
+
+  function makeResultEditable() {
+    document.querySelectorAll('.result-section .editable').forEach(function (el) {
+      el.setAttribute('contenteditable', 'true');
+      el.classList.add('editing');
+    });
+  }
+  function makeResultReadonly() {
+    document.querySelectorAll('.result-section .editable').forEach(function (el) {
+      el.setAttribute('contenteditable', 'false');
+      el.classList.remove('editing');
+    });
+  }
+
+  // ── Guide collapsible ───────────────────────
+  guideHeader.addEventListener('click', function () {
+    guide.classList.toggle('open');
+  });
+
+  // ── Upload ──────────────────────────────────
+  uploadZone.addEventListener('click', function (e) {
+    if (e.target.closest('#remove-file')) return;
+    const input = uploadZone.querySelector('#file-input');
+    if (input) input.click();
+  });
+
+  fileInput.addEventListener('change', function () {
+    if (this.files && this.files[0]) handleFile(this.files[0]);
+  });
+
+  uploadZone.addEventListener('dragover', function (e) {
+    e.preventDefault();
+    uploadZone.classList.add('drag-over');
+  });
+  uploadZone.addEventListener('dragleave', function () {
+    uploadZone.classList.remove('drag-over');
+  });
+  uploadZone.addEventListener('drop', function (e) {
+    e.preventDefault();
+    uploadZone.classList.remove('drag-over');
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFile(e.dataTransfer.files[0]);
+    }
+  });
+
+  function handleFile(file) {
+    if (!file.type.startsWith('image/')) { showToast('请上传图片文件'); return; }
+    uploadedFile = file;
+    const reader = new FileReader();
+    reader.onload = function (ev) {
+      // 保存图片数据供下载使用
+      var hid = document.getElementById('stored-image-data') || document.createElement('input');
+      hid.type = 'hidden';
+      hid.id = 'stored-image-data';
+      hid.value = ev.target.result;
+      document.body.appendChild(hid);
+
+      uploadZone.classList.add('has-image');
+      uploadZone.innerHTML =
+        '<div class="upload-preview">' +
+          '<img src="' + ev.target.result + '" alt="预览" />' +
+          '<div class="meta">' +
+            '<span class="name">' + escHtml(file.name) + '</span>' +
+            '<span class="size">' + fmtSize(file.size) + '</span>' +
+          '</div>' +
+          '<button class="remove" id="remove-file">移除</button>' +
+        '</div>';
+      document.getElementById('remove-file').addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        clearUpload();
+      });
+    };
+    reader.readAsDataURL(file);
+    checkReady();
+  }
+
+  window.clearUpload = function () {
+    uploadedFile = null;
+    fileInput.value = '';
+    var hid = document.getElementById('stored-image-data');
+    if (hid) hid.value = '';
+    uploadZone.classList.remove('has-image');
+    uploadZone.innerHTML =
+      '<svg class="upload-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
+        '<rect x="2" y="2" width="20" height="20" rx="3" />' +
+        '<circle cx="8.5" cy="8.5" r="1.5" />' +
+        '<path d="M2 16l4.5-4.5 3 3L14 10l8 8" />' +
+      '</svg>' +
+      '<div class="upload-text">拖拽图片到此处，或 <strong>点击选择文件</strong></div>' +
+      '<div class="upload-hint">JPG / PNG / WebP，最大 20MB</div>' +
+      '<input type="file" id="file-input" accept="image/*" hidden />';
+    document.getElementById('file-input').addEventListener('change', function () {
+      if (this.files && this.files[0]) handleFile(this.files[0]);
+    });
+    checkReady();
+  };
+
+  function escHtml(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+  function fmtSize(b) {
+    if (b < 1024) return b + ' B';
+    if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
+    return (b / 1048576).toFixed(1) + ' MB';
+  }
+
+  function checkReady() {
+    // Topic and image are now both optional — always enable
+    btnGenerate.disabled = false;
+  }
+
+  topicInput.addEventListener('input', checkReady);
+
+  // ── Generate ────────────────────────────────
+  btnGenerate.addEventListener('click', function () {
+    if (btnGenerate.classList.contains('loading')) return;
+
+    resultArea.classList.remove('visible');
+
+    btnGenerate.classList.add('loading');
+    btnGenerate.innerHTML = 'AI 正在生成教案 <span class="loading-dots"><span></span><span></span><span></span></span>';
+
+    const topic       = topicInput.value.trim();
+    const materials   = document.getElementById('materials').value.trim();
+    const prompt      = document.getElementById('creative-prompt').value.trim();
+    const classLevel  = document.getElementById('class-level').value.trim();
+    const duration    = document.getElementById('duration').value.trim() || '90分钟';
+    const apiKeyVal   = apiKey.value.trim();
+    const modelVal    = modelSelect.value;
+    const modelNames  = { qwen: '通义千问 Qwen-VL (阿里云)', glm: 'GLM-5V-Turbo (智谱AI)', mimo: '小米 MiMo-VL', kimi: 'Kimi-VL (月之暗面)' };
+
+    function doGenerate(imgData) {
+      fetch('/api/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: modelNames[modelVal] || modelNames.qwen,
+          api_key: apiKeyVal,
+          title: topic, level: classLevel, duration: duration,
+          materials: materials, prompt: prompt, image_data: imgData || '',
+        })
+      })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        btnGenerate.classList.remove('loading');
+        btnGenerate.textContent = '生成教案';
+        if (!res.success) { showToast('生成失败：' + (res.error || '未知错误')); return; }
+        lastPlan = res.data;
+        renderResult(res.data);
+        resultArea.classList.add('visible');
+        if (editMode) makeResultEditable();
+      })
+      .catch(function (err) {
+        btnGenerate.classList.remove('loading');
+        btnGenerate.textContent = '生成教案';
+        showToast('请求失败：' + err.message);
+      });
+    }
+
+    if (uploadedFile) {
+      var reader = new FileReader();
+      reader.onload = function (ev) { doGenerate(ev.target.result); };
+      reader.readAsDataURL(uploadedFile);
+    } else {
+      doGenerate('');
+    }
+  });
+
+  function renderResult(plan) {
+    document.getElementById('result-title').textContent = plan.title;
+    document.getElementById('result-objectives').textContent = plan.objectives;
+    var points = [];
+    if (plan.key_points) points.push(plan.key_points);
+    if (plan.difficult_points) points.push(plan.difficult_points);
+    document.getElementById('result-key-points').innerHTML = points.map(function(k) { return '<li class="editable">' + k + '</li>'; }).join('');
+
+    var steps = plan.process ? plan.process.split('\n').filter(function(s) { return s.trim(); }) : [];
+    document.getElementById('result-steps').innerHTML = steps.map(function(s) { return '<li class="editable">' + s + '</li>'; }).join('');
+
+    var mats = plan.materials ? plan.materials.split(/[,，、\s]+/).filter(Boolean) : [];
+    document.getElementById('result-material-tags').innerHTML = mats.map(function(t) { return '<span class="tag">' + t + '</span>'; }).join('');
+  }
+
+  // ── Result actions ──────────────────────────
+  document.getElementById('btn-download').addEventListener('click', function () {
+    var plan = lastPlan;
+    if (!plan) { showToast('请先生成教案'); return; }
+    var fmt = formatGroup.querySelector('.radio-chip.selected').dataset.value;
+    var imgData = document.getElementById('stored-image-data') ? document.getElementById('stored-image-data').value : '';
+    fetch('/api/download', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ format: fmt, title: plan.title, level: plan.level, duration: plan.duration, materials: plan.materials, objectives: plan.objectives, key_points: plan.key_points, difficult_points: plan.difficult_points, process: plan.process, extension: '', notes: '', image_data: imgData })
+    })
+    .then(function (r) { return r.blob(); })
+    .then(function (blob) {
+      var a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = '教案文档.' + (fmt === 'pdf' ? 'pdf' : 'docx');
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(a.href);
+    });
+  });
+
+  document.getElementById('btn-copy').addEventListener('click', function () {
+    const card = document.querySelector('.result-card');
+    if (!card) return;
+    const clone = card.cloneNode(true);
+    clone.querySelector('.result-card-header').style.background = 'none';
+    const text = clone.innerText;
+    navigator.clipboard.writeText(text).then(function () {
+      showToast('教案文字已复制到剪贴板');
+    }).catch(function () {
+      showToast('复制失败，请手动选择文字');
+    });
+  });
+
+  document.getElementById('btn-regenerate').addEventListener('click', function () {
+    resultArea.classList.remove('visible');
+    setTimeout(function () { btnGenerate.click(); }, 200);
+  });
+
+  // ── Toast ───────────────────────────────────
+  let toastTimer;
+  function showToast(msg) {
+    clearTimeout(toastTimer);
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 2400);
+  }
+})();
+</script>
+
+</body>
+</html>

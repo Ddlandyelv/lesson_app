@@ -7,20 +7,21 @@ from .models import LessonData
 class LessonPDF(FPDF):
     def __init__(self):
         super().__init__()
-        self.add_font("song", "", "C:/Windows/Fonts/simsun.ttc", uni=True)
+        self.add_font("yh", "", "C:/Windows/Fonts/msyh.ttc", uni=True)
+        self.add_font("yh", "B", "C:/Windows/Fonts/msyhbd.ttc", uni=True)
         self.set_auto_page_break(auto=True, margin=20)
 
     def doc_title(self, text):
-        self.set_font("song", "", 18)
+        self.set_font("yh", "B", 18)
         self.cell(0, 12, text, new_x="LMARGIN", new_y="NEXT", align="C")
         self.ln(6)
 
     def info(self, label, value):
-        self.set_font("song", "", 11)
+        self.set_font("yh", "", 11)
         self.cell(0, 7, f"{label}{value}", new_x="LMARGIN", new_y="NEXT")
 
     def heading(self, text):
-        self.set_font("song", "", 14)
+        self.set_font("yh", "", 14)
         self.ln(5)
         self.cell(0, 8, text, new_x="LMARGIN", new_y="NEXT")
         self.ln(4)
@@ -28,7 +29,7 @@ class LessonPDF(FPDF):
     def body(self, text):
         if not text.strip():
             return
-        self.set_font("song", "", 11)
+        self.set_font("yh", "", 11)
         for line in text.split("\n"):
             if not line.strip():
                 continue
@@ -37,7 +38,7 @@ class LessonPDF(FPDF):
             self.ln(0.5)
 
     def bullet(self, text):
-        self.set_font("song", "", 11)
+        self.set_font("yh", "", 11)
         self.cell(9)
         self.multi_cell(0, 6, "• " + text.strip())
         self.ln(0.5)
@@ -60,7 +61,7 @@ def export_to_pdf(data: LessonData, output_path: str):
 
     # 重难点
     pdf.heading("二、教学重难点")
-    pdf.set_font("song", "", 11)
+    pdf.set_font("yh", "", 11)
     pdf.cell(7)
     pdf.multi_cell(0, 6.5, f"【教学重点】{data.key_points}")
     pdf.ln(1)
@@ -75,7 +76,7 @@ def export_to_pdf(data: LessonData, output_path: str):
         if not step:
             continue
         if step.startswith("【") and "】" in step[:10]:
-            pdf.set_font("song", "", 11)
+            pdf.set_font("yh", "", 11)
             pdf.cell(7)
             pdf.multi_cell(0, 6.5, step)
             pdf.ln(1)
