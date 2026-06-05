@@ -122,11 +122,16 @@ def download():
     return send_file(output_path, as_attachment=True)
 
 if __name__ == "__main__":
-    import threading, time, webbrowser
+    import threading, time, webbrowser, os as _os
 
     def _open_browser():
         time.sleep(1.5)
         webbrowser.open("http://127.0.0.1:5000")
 
-    threading.Thread(target=_open_browser, daemon=True).start()
-    app.run(host="127.0.0.1", port=5000)
+    # 本地才自动打开浏览器，服务器环境不打开
+    _on_render = _os.environ.get("RENDER") == "1"
+    if not _on_render:
+        threading.Thread(target=_open_browser, daemon=True).start()
+
+    _port = int(_os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=_port)

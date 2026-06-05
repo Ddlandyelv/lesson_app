@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>美术教案生成器</title>
   <style>
     :root {
@@ -14,12 +14,11 @@
       --accent:   oklch(54% 0.16 35);
       --accent-2: oklch(68% 0.10 55);
       --success:  oklch(58% 0.14 160);
-      --warn:     oklch(65% 0.14 65);
 
-      --font-display: 'Söhne', 'Avenir Next', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+      --font-display: 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
       --font-body:    'PingFang SC', 'Microsoft YaHei', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-      --radius: 14px;
-      --radius-sm: 8px;
+      --radius: 16px;
+      --radius-sm: 10px;
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -27,150 +26,131 @@
     body {
       background: var(--bg);
       color: var(--fg);
-      font: 15px/1.6 var(--font-body);
+      font: 16px/1.6 var(--font-body);
       -webkit-font-smoothing: antialiased;
       min-height: 100vh;
+      padding-bottom: 100px;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
     }
 
-    /* ── Layout ─────────────────────────────── */
-    .app { display: flex; min-height: 100vh; }
-
-    /* ── Sidebar ────────────────────────────── */
-    .sidebar {
-      width: 300px;
-      min-width: 300px;
+    /* ── Header ─────────────────────────────── */
+    .header {
       background: var(--surface);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      padding: 32px 24px;
-      gap: 26px;
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      overflow-y: auto;
-      z-index: 10;
-      transition: width 0.3s, min-width 0.3s, padding 0.3s, border 0.3s;
-    }
-    .sidebar.collapsed {
-      width: 0;
-      min-width: 0;
-      padding: 32px 0;
-      border-right: none;
-      overflow: hidden;
-    }
-    .sidebar-collapse-btn {
-      position: absolute;
-      top: 20px;
-      right: 12px;
-      width: 30px;
-      height: 30px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      cursor: pointer;
-      display: grid;
-      place-items: center;
-      font-size: 14px;
-      color: var(--muted);
-      transition: all 0.15s;
-      flex-shrink: 0;
-    }
-    .sidebar-collapse-btn:hover {
-      background: var(--bg);
-      color: var(--fg);
-      border-color: var(--muted);
-    }
-    .sidebar.collapsed .sidebar-collapse-btn { display: none; }
-    .sidebar-expand-tab {
-      display: none;
-      position: fixed;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 11;
-      width: 38px;
-      height: 72px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-left: none;
-      border-radius: 0 13px 13px 0;
-      cursor: pointer;
-      box-shadow: 2px 0 14px rgba(0,0,0,0.07);
-      transition: background 0.15s, width 0.2s, box-shadow 0.2s;
-      overflow: hidden;
-    }
-    .sidebar-expand-tab::before {
-      content: '';
-      display: block;
-      width: 8px;
-      height: 8px;
-      border-right: 2px solid var(--muted);
-      border-top: 2px solid var(--muted);
-      transform: rotate(45deg);
-      margin-left: -2px;
-      transition: border-color 0.15s;
-    }
-    .sidebar-expand-tab:hover {
-      background: oklch(54% 0.16 35 / 0.06);
-      width: 44px;
-      box-shadow: 2px 0 22px rgba(0,0,0,0.12);
-    }
-    .sidebar-expand-tab:hover::before {
-      border-color: var(--accent);
-    }
-    .sidebar-expand-tab.visible { display: grid; place-items: center; }
-
-    .sidebar-brand {
+      border-bottom: 1px solid var(--border);
+      padding: 16px 20px;
       display: flex;
       align-items: center;
       gap: 12px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
-    .sidebar-brand .logo {
-      width: 42px; height: 42px;
+    .header-logo {
+      width: 40px; height: 40px;
       border-radius: 12px;
       background: linear-gradient(135deg, var(--accent), oklch(64% 0.18 30));
       display: grid; place-items: center;
-      color: #fff;
-      font-size: 20px;
+      color: #fff; font-size: 18px;
+      flex-shrink: 0;
     }
-    .sidebar-brand h1 {
+    .header h1 {
       font: 600 18px/1.3 var(--font-display);
       letter-spacing: -0.01em;
+      flex: 1;
     }
-    .sidebar-brand .ver {
+    .header .ver {
       font-size: 11px;
       color: var(--muted);
       font-weight: 400;
-      margin-top: 2px;
     }
 
-    .sidebar-section { display: flex; flex-direction: column; gap: 8px; }
-    .sidebar-section > label {
-      font-size: 11px;
+    /* ── Content ─────────────────────────────── */
+    .content {
+      padding: 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    /* ── Settings panel (collapsible) ────────── */
+    .settings-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .settings-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      cursor: pointer;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      transition: background 0.15s;
+    }
+    .settings-header:active { background: var(--bg); }
+    .settings-header h3 {
+      font: 600 15px/1 var(--font-display);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .settings-arrow {
+      font-size: 14px;
+      color: var(--muted);
+      transition: transform 0.25s;
+    }
+    .settings-panel.open .settings-arrow { transform: rotate(180deg); }
+
+    .settings-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.35s ease;
+    }
+    .settings-panel.open .settings-body { max-height: 900px; }
+
+    .settings-inner {
+      padding: 0 18px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .field {
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    .field label {
+      font-size: 12px;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.07em;
+      letter-spacing: 0.06em;
       color: var(--muted);
     }
-
-    .sidebar select,
-    .sidebar input[type="password"],
-    .sidebar input[type="text"] {
+    .field select,
+    .field input[type="password"],
+    .field input[type="text"] {
       width: 100%;
-      padding: 10px 14px;
+      padding: 12px 14px;
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
-      font: 14px var(--font-body);
+      font: 15px var(--font-body);
       color: var(--fg);
       background: var(--bg);
       outline: none;
       transition: border 0.15s, box-shadow 0.15s;
+      -webkit-appearance: none;
+      appearance: none;
     }
-    .sidebar select:focus,
-    .sidebar input:focus {
+    .field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238b7b6b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 36px;
+    }
+    .field select:focus,
+    .field input:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px oklch(54% 0.16 35 / 0.12);
     }
@@ -178,23 +158,20 @@
     .model-info {
       background: oklch(54% 0.16 35 / 0.05);
       border-radius: var(--radius-sm);
-      padding: 10px 12px;
-      font-size: 12px;
+      padding: 10px 14px;
+      font-size: 13px;
       color: var(--muted);
       line-height: 1.5;
     }
     .model-info .model-id {
-      font: 600 13px var(--font-body);
+      font: 600 14px var(--font-body);
       color: var(--fg);
-      display: inline;
-      margin-bottom: 3px;
     }
     .model-badge {
       display: none;
       margin-left: 8px;
       padding: 1px 8px;
-      font-size: 11px;
-      font-weight: 600;
+      font-size: 11px; font-weight: 600;
       color: #fff;
       background: var(--accent);
       border-radius: 4px;
@@ -202,54 +179,69 @@
     }
     .model-badge.show { display: inline; }
 
-    .api-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .api-row { display: flex; gap: 8px; }
     .api-row input { flex: 1; }
+    .api-actions {
+      display: flex; gap: 8px;
+      margin-top: 8px;
+    }
+    .btn-api-action {
+      flex: 1;
+      padding: 10px 14px;
+      font-size: 13px; font-weight: 500;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      color: var(--fg);
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .btn-api-action:active { background: var(--bg); border-color: var(--accent); }
+    .btn-api-action.saved { background: oklch(54% 0.16 35 / 0.08); border-color: var(--accent); }
     .btn-icon {
-      width: 38px; height: 38px;
+      width: 44px; height: 44px;
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       background: var(--surface);
       cursor: pointer;
       display: grid; place-items: center;
-      font-size: 15px;
+      font-size: 18px;
       transition: all 0.15s;
       flex-shrink: 0;
     }
-    .btn-icon:hover { background: var(--bg); border-color: var(--accent); }
+    .btn-icon:active { background: var(--bg); border-color: var(--accent); }
     .btn-icon.saved { background: oklch(54% 0.16 35 / 0.08); border-color: var(--accent); }
     .api-link {
-      font-size: 11px;
+      font-size: 12px;
       color: var(--accent);
       text-decoration: none;
       display: inline-flex;
       align-items: center;
       gap: 4px;
-    }
-    .api-link:hover { text-decoration: underline; }
-    .api-note {
       margin-top: 6px;
-      font-size: 11px;
+    }
+    .api-note {
+      margin-top: 4px;
+      font-size: 12px;
       color: var(--muted);
-      letter-spacing: 0.01em;
     }
 
     .radio-group { display: flex; gap: 8px; }
     .radio-chip {
       flex: 1;
-      padding: 10px;
+      padding: 12px;
       border: 1px solid var(--border);
       border-radius: var(--radius-sm);
       text-align: center;
-      font-size: 13px;
+      font-size: 14px;
       cursor: pointer;
       transition: all 0.15s;
       user-select: none;
+      -webkit-tap-highlight-color: transparent;
     }
-    .radio-chip:hover { background: var(--bg); }
+    .radio-chip:active { background: var(--bg); }
     .radio-chip.selected {
       border-color: var(--accent);
       background: oklch(54% 0.16 35 / 0.06);
@@ -258,105 +250,11 @@
     }
     .radio-chip input { display: none; }
 
-    .sidebar-footer {
-      margin-top: auto;
-      padding-top: 20px;
-      border-top: 1px solid var(--border);
-      font-size: 11px;
-      color: var(--muted);
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    /* ── Hamburger ──────────────────────────── */
-    .hamburger {
-      display: none;
-      position: fixed;
-      top: 16px;
-      left: 16px;
-      z-index: 20;
-      width: 42px; height: 42px;
-      border-radius: 12px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      cursor: pointer;
-      font-size: 20px;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-    }
-    .sidebar-overlay {
-      display: none;
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,0.25);
-      z-index: 9;
-    }
-
-    /* ── Main ────────────────────────────────── */
-    .main {
-      flex: 1;
-      max-width: 840px;
-      margin: 0 auto;
-      padding: 40px 48px 60px;
-      display: flex;
-      flex-direction: column;
-      gap: 32px;
-      width: 100%;
-    }
-
-    .main-header h2 {
-      font: 600 28px/1.3 var(--font-display);
-      letter-spacing: -0.02em;
-    }
-    .main-header p {
-      font-size: 14px;
-      color: var(--muted);
-      margin-top: 6px;
-    }
-
-    .form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-    }
-    .form-field {
-      display: flex; flex-direction: column; gap: 6px;
-    }
-    .form-field.full { grid-column: 1 / -1; }
-    .form-field label {
-      font-size: 13px;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .form-field label .optional {
-      font-size: 11px;
-      font-weight: 400;
-      color: var(--muted);
-    }
-    .form-field input,
-    .form-field textarea {
-      padding: 12px 16px;
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      font: 14px var(--font-body);
-      color: var(--fg);
-      background: var(--surface);
-      outline: none;
-      transition: border 0.15s, box-shadow 0.15s;
-    }
-    .form-field input:focus,
-    .form-field textarea:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px oklch(54% 0.16 35 / 0.12);
-    }
-    .form-field textarea { min-height: 80px; resize: vertical; }
-
-    /* ── Upload ───────────────────────────────── */
+    /* ── Upload zone ─────────────────────────── */
     .upload-zone {
       border: 2px dashed var(--border);
       border-radius: var(--radius);
-      padding: 36px 24px;
+      padding: 28px 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -364,69 +262,67 @@
       cursor: pointer;
       transition: all 0.2s;
       background: var(--surface);
+      text-align: center;
+      -webkit-tap-highlight-color: transparent;
     }
-    .upload-zone:hover,
+    .upload-zone:active,
     .upload-zone.drag-over {
       border-color: var(--accent);
       background: oklch(54% 0.16 35 / 0.03);
     }
-    .upload-zone.has-image { border-style: solid; padding: 16px; }
+    .upload-zone.has-image { border-style: solid; padding: 14px; }
     .upload-icon-svg {
-      width: 48px; height: 48px;
+      width: 44px; height: 44px;
       color: var(--accent);
       opacity: 0.7;
     }
-    .upload-text { font-size: 14px; color: var(--muted); }
+    .upload-text { font-size: 15px; color: var(--muted); }
     .upload-text strong { color: var(--accent); font-weight: 600; }
     .upload-hint { font-size: 12px; color: var(--muted); }
 
     .upload-preview {
-      display: flex; align-items: center; gap: 16px;
+      display: flex; align-items: center; gap: 14px;
       width: 100%;
     }
     .upload-preview img {
-      width: 100px; height: 75px;
+      width: 90px; height: 68px;
       object-fit: cover;
       border-radius: var(--radius-sm);
       border: 1px solid var(--border);
     }
     .upload-preview .meta {
-      flex: 1;
+      flex: 1; min-width: 0;
       display: flex; flex-direction: column; gap: 4px;
-      min-width: 0;
     }
     .upload-preview .meta .name {
       font-weight: 600; font-size: 14px;
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
     }
-    .upload-preview .meta .size {
-      font-size: 12px; color: var(--muted);
-    }
-    .upload-preview .remove {
-      padding: 6px 14px;
-      font-size: 12px;
+    .upload-preview .meta .size { font-size: 12px; color: var(--muted); }
+    .upload-preview .remove-btn {
+      padding: 8px 14px;
+      font-size: 13px;
       border: 1px solid var(--border);
       border-radius: 20px;
       background: var(--surface);
       color: var(--muted);
       cursor: pointer;
-      transition: all 0.15s;
       flex-shrink: 0;
     }
-    .upload-preview .remove:hover {
+    .upload-preview .remove-btn:active {
       border-color: oklch(54% 0.16 22);
       color: oklch(54% 0.16 22);
     }
 
-    /* ── Toggle switch ────────────────────────── */
+    /* ── Toggle ──────────────────────────────── */
     .toggle-row {
       display: flex;
       align-items: center;
       gap: 12px;
     }
     .toggle {
-      width: 44px; height: 26px;
-      border-radius: 13px;
+      width: 48px; height: 28px;
+      border-radius: 14px;
       background: var(--border);
       cursor: pointer;
       transition: background 0.2s;
@@ -438,22 +334,31 @@
       content: '';
       position: absolute;
       top: 3px; left: 3px;
-      width: 20px; height: 20px;
+      width: 22px; height: 22px;
       border-radius: 50%;
       background: #fff;
       transition: transform 0.2s;
       box-shadow: 0 1px 3px rgba(0,0,0,0.15);
     }
-    .toggle.on::after { transform: translateX(18px); }
-    .toggle-label {
-      font-size: 13px;
-      font-weight: 500;
-    }
+    .toggle.on::after { transform: translateX(20px); }
+    .toggle-label { font-size: 14px; font-weight: 500; }
 
-    /* ── Generate button ─────────────────────── */
+    /* ── Generate button (sticky bar) ────────── */
+    .generate-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      padding: 12px 20px;
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+      background: linear-gradient(180deg, transparent, var(--bg) 30%);
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+    }
     .btn-generate {
-      padding: 16px 48px;
-      font: 600 16px/1 var(--font-display);
+      width: 100%;
+      max-width: 400px;
+      padding: 16px 32px;
+      font: 600 17px/1 var(--font-display);
       letter-spacing: -0.01em;
       color: #fff;
       background: linear-gradient(135deg, var(--accent), oklch(60% 0.18 28));
@@ -461,20 +366,13 @@
       border-radius: 30px;
       cursor: pointer;
       transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s;
-      box-shadow: 0 4px 18px oklch(54% 0.16 35 / 0.25);
-      align-self: flex-start;
+      box-shadow: 0 4px 20px oklch(54% 0.16 35 / 0.3);
+      -webkit-tap-highlight-color: transparent;
     }
-    .btn-generate:hover { transform: translateY(-1px); box-shadow: 0 6px 24px oklch(54% 0.16 35 / 0.32); }
-    .btn-generate:active { transform: translateY(0); }
-    .btn-generate:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
+    .btn-generate:active { transform: scale(0.97); }
     .btn-generate.loading { pointer-events: none; opacity: 0.85; }
 
-    /* ── Usage guide collapsible ─────────────── */
+    /* ── Guide ───────────────────────────────── */
     .guide {
       border: 1px solid var(--border);
       border-radius: var(--radius);
@@ -485,68 +383,55 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 16px 20px;
+      padding: 14px 18px;
       cursor: pointer;
       user-select: none;
+      -webkit-tap-highlight-color: transparent;
       transition: background 0.15s;
     }
-    .guide-header:hover { background: var(--bg); }
+    .guide-header:active { background: var(--bg); }
     .guide-header h3 {
       font: 600 15px/1 var(--font-display);
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      display: flex; align-items: center; gap: 8px;
     }
     .guide-arrow {
       transition: transform 0.25s;
-      font-size: 14px;
-      color: var(--muted);
+      font-size: 14px; color: var(--muted);
     }
     .guide.open .guide-arrow { transform: rotate(180deg); }
     .guide-body {
-      max-height: 0;
-      overflow: hidden;
-      transition: max-height 0.3s ease;
+      max-height: 0; overflow: hidden;
+      transition: max-height 0.35s ease;
     }
-    .guide.open .guide-body { max-height: 600px; }
+    .guide.open .guide-body { max-height: 700px; }
     .guide-content {
-      padding: 0 20px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
+      padding: 0 18px 18px;
+      display: flex; flex-direction: column; gap: 14px;
     }
-    .guide-steps {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-    }
+    .guide-steps { display: flex; flex-direction: column; gap: 12px; }
     .guide-step {
-      display: flex;
-      gap: 10px;
-      align-items: flex-start;
+      display: flex; gap: 12px; align-items: flex-start;
     }
     .guide-step .step-num {
-      width: 26px; height: 26px;
+      width: 28px; height: 28px;
       border-radius: 50%;
       background: oklch(54% 0.16 35 / 0.1);
       color: var(--accent);
       display: grid; place-items: center;
-      font-size: 13px; font-weight: 700;
+      font-size: 14px; font-weight: 700;
       flex-shrink: 0;
     }
-    .guide-step .step-text { font-size: 13px; line-height: 1.5; color: var(--muted); }
-    .guide-step .step-text strong { color: var(--fg); }
+    .guide-step .step-text { font-size: 14px; line-height: 1.5; color: var(--muted); }
+    .guide-step .step-text strong { color: var(--fg); display: block; margin-bottom: 2px; }
     .guide-faq {
       border-top: 1px solid var(--border);
-      padding-top: 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+      padding-top: 12px;
+      display: flex; flex-direction: column; gap: 8px;
     }
-    .guide-faq dt { font-size: 13px; font-weight: 600; }
-    .guide-faq dd { font-size: 12px; color: var(--muted); margin: 0 0 4px; }
+    .guide-faq dt { font-size: 14px; font-weight: 600; }
+    .guide-faq dd { font-size: 13px; color: var(--muted); margin-left: 0; }
 
-    /* ── Result area ─────────────────────────── */
+    /* ── Result ──────────────────────────────── */
     .result-area { display: none; }
     .result-area.visible { display: block; }
 
@@ -557,45 +442,42 @@
       overflow: hidden;
     }
     .result-card-header {
-      padding: 18px 24px;
+      padding: 16px 18px;
       background: linear-gradient(135deg, oklch(54% 0.16 35 / 0.05), oklch(68% 0.10 55 / 0.04));
       border-bottom: 1px solid var(--border);
       display: flex;
-      align-items: center;
-      gap: 12px;
+      align-items: flex-start;
+      gap: 10px;
     }
     .result-card-header .badge {
       font-size: 11px; font-weight: 600;
-      padding: 4px 12px;
+      padding: 3px 10px;
       border-radius: 20px;
       background: var(--success);
       color: #fff;
       flex-shrink: 0;
+      margin-top: 2px;
     }
     .result-card-header h3 {
-      font: 600 17px/1.3 var(--font-display);
+      font: 600 17px/1.4 var(--font-display);
       letter-spacing: -0.01em;
     }
     .result-card-body {
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
+      padding: 18px;
+      display: flex; flex-direction: column; gap: 18px;
     }
     .result-section h4 {
-      font-size: 11px;
-      font-weight: 600;
+      font-size: 11px; font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.06em;
       color: var(--accent);
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
     .result-section p,
     .result-section ul {
-      font-size: 14px;
-      line-height: 1.7;
+      font-size: 15px; line-height: 1.7;
     }
-    .result-section ul { padding-left: 20px; }
+    .result-section ul { padding-left: 18px; }
     .result-section ul li { margin-bottom: 6px; }
     .result-section .editable {
       border: 1px dashed transparent;
@@ -612,8 +494,8 @@
 
     .tag-row { display: flex; flex-wrap: wrap; gap: 8px; }
     .tag {
-      font-size: 12px;
-      padding: 4px 14px;
+      font-size: 13px;
+      padding: 5px 14px;
       border-radius: 20px;
       background: oklch(68% 0.10 55 / 0.12);
       color: oklch(40% 0.08 55);
@@ -621,292 +503,277 @@
     }
 
     .result-actions {
-      display: flex; gap: 10px;
-      padding: 0 24px 24px;
-      flex-wrap: wrap;
+      display: flex; flex-direction: column; gap: 8px;
+      padding: 0 18px 18px;
+    }
+    .result-actions .primary-row {
+      display: flex; gap: 8px;
+    }
+    .result-actions .secondary-row {
+      display: flex; gap: 8px;
     }
     .btn-secondary {
-      padding: 10px 22px;
-      font-size: 13px; font-weight: 500;
+      padding: 12px 20px;
+      font-size: 14px; font-weight: 500;
       border: 1px solid var(--border);
       border-radius: 22px;
       background: var(--surface);
       color: var(--fg);
       cursor: pointer;
       transition: all 0.15s;
+      text-align: center;
+      -webkit-tap-highlight-color: transparent;
     }
-    .btn-secondary:hover { background: var(--bg); border-color: var(--muted); }
+    .btn-secondary:active { background: var(--bg); border-color: var(--muted); }
     .btn-secondary.primary {
       background: var(--accent);
       color: #fff;
       border-color: var(--accent);
+      flex: 1;
     }
-    .btn-secondary.primary:hover { opacity: 0.9; }
+    .btn-secondary.primary:active { opacity: 0.85; }
 
-    /* ── Toast ────────────────────────────────── */
+    /* ── Toast ───────────────────────────────── */
     .toast {
-      position: fixed; bottom: 32px; left: 50%;
+      position: fixed; bottom: 100px; left: 50%;
       transform: translateX(-50%);
-      padding: 12px 28px;
+      padding: 12px 24px;
       background: oklch(22% 0.025 35);
       color: #fff;
       border-radius: 30px;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 500;
       z-index: 1000;
       opacity: 0;
       pointer-events: none;
       transition: opacity 0.3s;
+      white-space: nowrap;
     }
     .toast.show { opacity: 1; }
 
-    /* ── Loading dots ─────────────────────────── */
+    /* ── Loading dots ────────────────────────── */
     @keyframes dotPulse {
       0%, 100% { opacity: 0.3; }
       50% { opacity: 1; }
     }
-    .loading-dots { display: inline-flex; gap: 4px; align-items: center; }
+    .loading-dots { display: inline-flex; gap: 4px; align-items: center; margin-left: 4px; }
     .loading-dots span {
       width: 6px; height: 6px;
       border-radius: 50%;
       background: currentColor;
       animation: dotPulse 1.2s infinite;
+      display: inline-block;
     }
     .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
     .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
 
-    /* ── Responsive ───────────────────────────── */
-    @media (max-width: 860px) {
-      .app { flex-direction: column; }
-
-      .sidebar {
-        position: fixed;
-        inset: 0;
-        width: 100%;
-        max-width: 340px;
-        min-width: 300px;
-        height: 100vh;
-        transform: translateX(0);
-        z-index: 15;
-        box-shadow: 4px 0 30px rgba(0,0,0,0.1);
-      }
-      .sidebar.collapsed,
-      .sidebar:not(.open) { transform: translateX(-100%); }
-      .sidebar.collapsed { width: 0; min-width: 0; padding: 32px 0; }
-
-      .hamburger { display: grid; place-items: center; position: fixed; top: 16px; right: 16px; left: auto; }
-      .hamburger span { display: block; }
-      .sidebar-overlay.show { display: block; }
-      .sidebar-collapse-btn { display: none; }
-      .sidebar-expand-tab { display: none !important; }
-
-      .main { padding: 24px 20px 40px; }
-      .form-grid { grid-template-columns: 1fr; }
-
-      .guide-steps { grid-template-columns: 1fr; }
-      .btn-generate { width: 100%; justify-content: center; display: flex; }
-      .main-header h2 { font-size: 22px; }
+    /* ── Empty state hint ────────────────────── */
+    .empty-hint {
+      text-align: center;
+      padding: 24px;
+      color: var(--muted);
+      font-size: 14px;
     }
+    .empty-hint p + p { margin-top: 4px; font-size: 13px; opacity: 0.7; }
   </style>
 </head>
 <body>
 
-<div class="app">
-  <!-- ═══════ Hamburger (mobile) ═══════ -->
-  <button class="hamburger" id="btn-hamburger" aria-label="关闭侧边栏"><span>✕</span></button>
-  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+<!-- ═══════ Header ═══════ -->
+<div class="header">
+  <div class="header-logo">🎨</div>
+  <div>
+    <h1>美术教案生成器</h1>
+    <div class="ver">AI 驱动 · 教案自动化</div>
+  </div>
+</div>
 
-  <!-- ═══════ SIDEBAR ═══════ -->
-  <aside class="sidebar" id="sidebar">
-    <button class="sidebar-collapse-btn" id="btn-collapse-sidebar" title="收起侧边栏" aria-label="收起侧边栏">◂</button>
-    <div class="sidebar-brand">
-      <div class="logo">🎨</div>
-      <div>
-        <h1>美术教案生成器</h1>
-        <div class="ver">AI 驱动 · 教案自动化</div>
-      </div>
+<div class="content" id="main-content">
+
+  <!-- ═══════ Settings ═══════ -->
+  <div class="settings-panel" id="settings-panel">
+    <div class="settings-header" id="settings-header">
+      <h3>⚙️ 模型与设置</h3>
+      <span class="settings-arrow">▾</span>
     </div>
-
-    <div class="sidebar-section">
-      <label>模型选择</label>
-      <select id="model-select">
-        <option value="qwen">通义千问 (Qwen-VL)（推荐）</option>
-        <option value="glm">智谱 GLM-5V</option>
-        <option value="mimo">小米 MiMo</option>
-        <option value="kimi">Moonshot Kimi-VL</option>
-      </select>
-      <div class="model-info" id="model-info">
-        <span class="model-id" id="model-id">qwen3-vl-plus</span><span class="model-badge show" id="model-badge">推荐</span>
-        <span id="model-desc">通义千问多模态视觉模型，支持高精度图像理解与教案生成</span>
-      </div>
-    </div>
-
-    <div class="sidebar-section">
-      <label>API 密钥</label>
-      <div class="api-row">
-        <input type="password" id="api-key" placeholder="输入 API 密钥…" />
-        <button class="btn-icon" id="btn-save-key" title="记住密钥" aria-label="记住密钥">💾</button>
-        <button class="btn-icon" id="btn-clear-key" title="清除密钥" aria-label="清除密钥">🗑</button>
-      </div>
-      <a class="api-link" id="api-link" href="https://dashscope.aliyun.com/" target="_blank" rel="noopener">
-        获取 API 密钥 ↗
-      </a>
-      <div class="api-note">🔒 密钥仅存储在本地浏览器中，不会被上传或分享</div>
-    </div>
-
-    <div class="sidebar-section">
-      <label>输出格式</label>
-      <div class="radio-group" id="format-group">
-        <label class="radio-chip selected" data-value="docx">
-          <input type="radio" name="format" value="docx" checked />
-          Word · .docx
-        </label>
-        <label class="radio-chip" data-value="pdf">
-          <input type="radio" name="format" value="pdf" />
-          PDF · .pdf
-        </label>
-      </div>
-    </div>
-
-    <div class="sidebar-section">
-      <label>适用班级</label>
-      <input type="text" id="class-level" placeholder="例如：启蒙班、初级班…" />
-    </div>
-
-    <div class="sidebar-section">
-      <label>课时</label>
-      <input type="text" id="duration" placeholder="例如：45分钟" value="90分钟" />
-    </div>
-
-    <div class="sidebar-section">
-      <label>输出文件名</label>
-      <input type="text" id="filename" placeholder="教案文档" value="教案文档" />
-    </div>
-
-    <div class="sidebar-footer">
-      <div>教案模板 v2.1</div>
-      <div>支持 启蒙班 / 初级班 / 中级班 / 高级班</div>
-    </div>
-  </aside>
-  <div class="sidebar-expand-tab" id="sidebar-expand-tab" title="展开侧边栏" aria-label="展开侧边栏"></div>
-
-  <!-- ═══════ MAIN ═══════ -->
-  <main class="main" id="main-content">
-    <div class="main-header">
-      <h2>创建新教案</h2>
-      <p>上传学生美术作品，AI 自动分析画面内容并生成结构化教案</p>
-    </div>
-
-    <div class="form-grid">
-      <div class="form-field full">
-        <label>教案主题 <span class="optional">（选填，留空 AI 自动识别）</span></label>
-        <input type="text" id="topic" placeholder="例如：色彩对比练习、素描明暗关系、水彩花卉写生…" />
-      </div>
-      <div class="form-field full">
-        <label>绘画材料 <span class="optional">（选填，留空 AI 自动识别）</span></label>
-        <input type="text" id="materials" placeholder="例如：水彩颜料、8开素描纸、铅笔、橡皮…" />
-      </div>
-      <div class="form-field full">
-        <label>创意提示词 <span class="optional">（选填，对教案的额外要求）</span></label>
-        <textarea id="creative-prompt" placeholder="例如：侧重色彩搭配教学、加入名画赏析环节…" rows="2"></textarea>
-      </div>
-    </div>
-
-    <div class="form-field">
-      <label>参考图片 <span class="optional">（推荐必填）</span></label>
-      <div class="upload-zone" id="upload-zone">
-        <svg class="upload-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="2" width="20" height="20" rx="3" />
-          <circle cx="8.5" cy="8.5" r="1.5" />
-          <path d="M2 16l4.5-4.5 3 3L14 10l8 8" />
-        </svg>
-        <div class="upload-text">拖拽图片到此处，或 <strong>点击选择文件</strong></div>
-        <div class="upload-hint">JPG / PNG / WebP，最大 20MB</div>
-        <input type="file" id="file-input" accept="image/*" hidden />
-      </div>
-    </div>
-
-    <div class="toggle-row">
-      <div class="toggle" id="toggle-edit"></div>
-      <span class="toggle-label">手动编辑生成结果</span>
-    </div>
-
-    <button class="btn-generate" id="btn-generate">生成教案</button>
-
-    <!-- ═══════ Usage guide ═══════ -->
-    <div class="guide" id="guide">
-      <div class="guide-header" id="guide-header">
-        <h3>📖 使用说明</h3>
-        <span class="guide-arrow">▾</span>
-      </div>
-      <div class="guide-body">
-        <div class="guide-content">
-          <div class="guide-steps">
-            <div class="guide-step">
-              <span class="step-num">1</span>
-              <span class="step-text"><strong>上传作品</strong><br />拖拽或点击上传学生美术作品图片</span>
-            </div>
-            <div class="guide-step">
-              <span class="step-num">2</span>
-              <span class="step-text"><strong>配置参数</strong><br />在侧边栏选择模型、填写班级和课时信息</span>
-            </div>
-            <div class="guide-step">
-              <span class="step-num">3</span>
-              <span class="step-text"><strong>一键生成</strong><br />点击生成按钮，AI 自动分析并输出教案</span>
-            </div>
+    <div class="settings-body">
+      <div class="settings-inner">
+        <div class="field">
+          <label>模型选择</label>
+          <select id="model-select">
+            <option value="qwen">通义千问 (Qwen-VL)（推荐）</option>
+            <option value="glm">智谱 GLM-5V</option>
+            <option value="mimo">小米 MiMo</option>
+            <option value="kimi">Moonshot Kimi-VL</option>
+          </select>
+          <div class="model-info">
+            <span class="model-id" id="model-id">qwen3-vl-plus</span>
+            <span class="model-badge show" id="model-badge">推荐</span>
+            <br /><span id="model-desc">通义千问多模态视觉模型，支持高精度图像理解与教案生成</span>
           </div>
-          <dl class="guide-faq">
-            <dt>不填主题会怎样？</dt>
-            <dd>AI 会根据上传的图片自动识别绘画主题和技法，自动生成教案标题。</dd>
-            <dt>支持哪些 AI 模型？</dt>
-            <dd>通义千问、GLM-5V、小米 MiMo、Kimi-VL，建议使用多模态视觉模型以获得最佳效果。</dd>
-            <dt>API 密钥安全吗？</dt>
-            <dd>密钥仅存储在您本地浏览器的 localStorage 中，不会被上传或分享。</dd>
-          </dl>
+        </div>
+
+        <div class="field">
+          <label>API 密钥</label>
+          <div class="api-row">
+            <input type="password" id="api-key" placeholder="输入 API 密钥…" />
+          </div>
+          <div class="api-actions">
+            <button class="btn-api-action" id="btn-save-key">💾 保存密钥</button>
+            <button class="btn-api-action" id="btn-clear-key">🗑 清除密钥</button>
+          </div>
+          <a class="api-link" id="api-link" href="https://dashscope.aliyun.com/" target="_blank" rel="noopener">获取 API 密钥 ↗</a>
+          <div class="api-note">🔒 密钥仅存储在本地浏览器中，不会被上传或分享</div>
+        </div>
+
+        <div class="field">
+          <label>输出格式</label>
+          <div class="radio-group" id="format-group">
+            <label class="radio-chip selected" data-value="docx">
+              <input type="radio" name="format" value="docx" checked /> Word
+            </label>
+            <label class="radio-chip" data-value="pdf">
+              <input type="radio" name="format" value="pdf" /> PDF
+            </label>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>适用班级</label>
+          <input type="text" id="class-level" placeholder="例如：启蒙班、初级班…" />
+        </div>
+
+        <div class="field">
+          <label>课时</label>
+          <input type="text" id="duration" placeholder="例如：45分钟" value="90分钟" />
+        </div>
+
+        <div class="field">
+          <label>输出文件名</label>
+          <input type="text" id="filename" placeholder="教案文档" value="教案文档" />
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- ═══════ Result ═══════ -->
-    <div class="result-area" id="result-area">
-      <div class="result-card">
-        <div class="result-card-header">
-          <span class="badge">已生成</span>
-          <h3 id="result-title">教案标题</h3>
+  <!-- ═══════ Main form ═══════ -->
+  <div class="field">
+    <label>教案主题 <span style="font-weight:400;color:var(--muted);font-size:12px">（选填）</span></label>
+    <input type="text" id="topic" placeholder="例如：色彩对比练习、水彩花卉写生…" />
+  </div>
+
+  <div class="field">
+    <label>绘画材料 <span style="font-weight:400;color:var(--muted);font-size:12px">（选填）</span></label>
+    <input type="text" id="materials" placeholder="例如：水彩颜料、8开素描纸…" />
+  </div>
+
+  <div class="field">
+    <label>创意提示词 <span style="font-weight:400;color:var(--muted);font-size:12px">（选填）</span></label>
+    <input type="text" id="creative-prompt" placeholder="例如：侧重色彩搭配教学…" />
+  </div>
+
+  <!-- ═══════ Upload ═══════ -->
+  <div class="field">
+    <label>参考图片 <span style="font-weight:400;color:var(--muted);font-size:12px">（推荐上传）</span></label>
+    <div class="upload-zone" id="upload-zone">
+      <svg class="upload-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="2" width="20" height="20" rx="3" />
+        <circle cx="8.5" cy="8.5" r="1.5" />
+        <path d="M2 16l4.5-4.5 3 3L14 10l8 8" />
+      </svg>
+      <div class="upload-text">点击上传作品图片</div>
+      <div class="upload-hint">JPG / PNG / WebP，最大 20MB</div>
+      <input type="file" id="file-input" accept="image/*" hidden />
+    </div>
+  </div>
+
+  <!-- ═══════ Edit toggle ═══════ -->
+  <div class="toggle-row">
+    <div class="toggle" id="toggle-edit"></div>
+    <span class="toggle-label">手动编辑生成结果</span>
+  </div>
+
+  <!-- ═══════ Usage guide ═══════ -->
+  <div class="guide" id="guide">
+    <div class="guide-header" id="guide-header">
+      <h3>📖 使用说明</h3>
+      <span class="guide-arrow">▾</span>
+    </div>
+    <div class="guide-body">
+      <div class="guide-content">
+        <div class="guide-steps">
+          <div class="guide-step">
+            <span class="step-num">1</span>
+            <span class="step-text"><strong>上传作品</strong>点击上传区域选择学生美术作品图片</span>
+          </div>
+          <div class="guide-step">
+            <span class="step-num">2</span>
+            <span class="step-text"><strong>配置参数</strong>在设置面板中选择模型、填写班级信息</span>
+          </div>
+          <div class="guide-step">
+            <span class="step-num">3</span>
+            <span class="step-text"><strong>一键生成</strong>点击底部按钮，AI 自动分析并生成教案</span>
+          </div>
         </div>
-        <div class="result-card-body">
-          <div class="result-section">
-            <h4>教学目标</h4>
-            <p class="editable" id="result-objectives"></p>
-          </div>
-          <div class="result-section">
-            <h4>教学重难点</h4>
-            <ul id="result-key-points"></ul>
-          </div>
-          <div class="result-section">
-            <h4>教学步骤</h4>
-            <ul id="result-steps"></ul>
-          </div>
-          <div class="result-section">
-            <h4>所需材料</h4>
-            <div class="tag-row" id="result-material-tags"></div>
-          </div>
+        <dl class="guide-faq">
+          <dt>不填主题会怎样？</dt>
+          <dd>AI 会根据上传图片自动识别绘画主题和技法，自动生成教案标题。</dd>
+          <dt>API 密钥安全吗？</dt>
+          <dd>密钥仅存储在您本地浏览器的 localStorage 中，不会被上传或分享。</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════ Result ═══════ -->
+  <div class="result-area" id="result-area">
+    <div class="result-card">
+      <div class="result-card-header">
+        <span class="badge">已生成</span>
+        <h3 id="result-title">教案标题</h3>
+      </div>
+      <div class="result-card-body">
+        <div class="result-section">
+          <h4>教学目标</h4>
+          <p class="editable" id="result-objectives"></p>
         </div>
-        <div class="result-actions">
+        <div class="result-section">
+          <h4>教学重难点</h4>
+          <ul id="result-key-points"></ul>
+        </div>
+        <div class="result-section">
+          <h4>教学步骤</h4>
+          <ul id="result-steps"></ul>
+        </div>
+        <div class="result-section">
+          <h4>所需材料</h4>
+          <div class="tag-row" id="result-material-tags"></div>
+        </div>
+      </div>
+      <div class="result-actions">
+        <div class="primary-row">
           <button class="btn-secondary primary" id="btn-download">下载教案文档</button>
+        </div>
+        <div class="secondary-row">
           <button class="btn-secondary" id="btn-copy">复制文字内容</button>
           <button class="btn-secondary" id="btn-regenerate">重新生成</button>
         </div>
       </div>
     </div>
-  </main>
+  </div>
+
+</div>
+
+<!-- ═══════ Generate bar ═══════ -->
+<div class="generate-bar">
+  <button class="btn-generate" id="btn-generate">生成教案</button>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
 (function () {
-  // ── State ────────────────────────────────────
+  // ── Models ───────────────────────────────────
   const models = {
     qwen:  { id: 'qwen3-vl-plus',  desc: '通义千问多模态视觉模型，支持高精度图像理解与教案生成', link: 'https://dashscope.aliyun.com/' },
     glm:   { id: 'glm-5v',         desc: '智谱 GLM-5V 视觉语言模型，支持图文理解与结构化输出',   link: 'https://open.bigmodel.cn/' },
@@ -918,12 +785,7 @@
   let editMode = false;
   let lastPlan = null;
 
-  // ── DOM refs ────────────────────────────────
-  const sidebar         = document.getElementById('sidebar');
-  const btnCollapse     = document.getElementById('btn-collapse-sidebar');
-  const btnHamburger    = document.getElementById('btn-hamburger');
-  const expandTab       = document.getElementById('sidebar-expand-tab');
-  const overlay         = document.getElementById('sidebar-overlay');
+  // ── DOM refs ─────────────────────────────────
   const modelSelect     = document.getElementById('model-select');
   const modelId         = document.getElementById('model-id');
   const modelDesc       = document.getElementById('model-desc');
@@ -939,79 +801,18 @@
   const resultArea      = document.getElementById('result-area');
   const guideHeader     = document.getElementById('guide-header');
   const guide           = document.getElementById('guide');
+  const settingsHeader  = document.getElementById('settings-header');
+  const settingsPanel   = document.getElementById('settings-panel');
   const toastEl         = document.getElementById('toast');
   const topicInput      = document.getElementById('topic');
   const modelBadge      = document.getElementById('model-badge');
 
-  let sidebarOpen = true;
-
-  // ── Desktop sidebar collapse ────────────────
-  function isMobile() { return window.innerWidth <= 860; }
-
-  function collapseSidebar() {
-    sidebarOpen = false;
-    sidebar.classList.add('collapsed');
-    expandTab.classList.add('visible');
-    try { localStorage.setItem('art-lesson:sidebar', 'collapsed'); } catch (_) {}
-  }
-  function expandSidebar() {
-    sidebarOpen = true;
-    sidebar.classList.remove('collapsed');
-    expandTab.classList.remove('visible');
-    try { localStorage.setItem('art-lesson:sidebar', 'open'); } catch (_) {}
-  }
-
-  btnCollapse.addEventListener('click', collapseSidebar);
-  expandTab.addEventListener('click', expandSidebar);
-
-  // ── Mobile sidebar ──────────────────────────
-  function openSidebar()  {
-    sidebarOpen = true;
-    sidebar.classList.add('open');
-    sidebar.classList.remove('collapsed');
-    overlay.classList.add('show');
-    expandTab.classList.remove('visible');
-    btnHamburger.querySelector('span').textContent = '✕';
-  }
-  function closeSidebar() {
-    sidebarOpen = false;
-    sidebar.classList.remove('open');
-    sidebar.classList.add('collapsed');
-    overlay.classList.remove('show');
-    expandTab.classList.add('visible');
-    btnHamburger.querySelector('span').textContent = '☰';
-  }
-  btnHamburger.addEventListener('click', function () {
-    if (isMobile()) {
-      if (sidebar.classList.contains('open')) closeSidebar(); else openSidebar();
-    }
-  });
-  overlay.addEventListener('click', closeSidebar);
-  sidebar.addEventListener('click', function (e) {
-    if (e.target.tagName === 'A') closeSidebar();
+  // ── Settings panel toggle ────────────────────
+  settingsHeader.addEventListener('click', function () {
+    settingsPanel.classList.toggle('open');
   });
 
-  // Restore desktop sidebar state from localStorage
-  if (!isMobile()) {
-    try {
-      const saved = localStorage.getItem('art-lesson:sidebar');
-      if (saved === 'collapsed') collapseSidebar();
-    } catch (_) {}
-  }
-
-  // On window resize, sync mobile/desktop states
-  window.addEventListener('resize', function () {
-    if (isMobile()) {
-      expandTab.classList.remove('visible');
-      if (sidebarOpen) openSidebar(); else closeSidebar();
-    } else {
-      overlay.classList.remove('show');
-      sidebar.classList.remove('open');
-      if (sidebarOpen) expandSidebar(); else collapseSidebar();
-    }
-  });
-
-  // ── Model switch ────────────────────────────
+  // ── Model switch ─────────────────────────────
   modelSelect.addEventListener('change', function () {
     const m = models[this.value];
     modelId.textContent   = m.id;
@@ -1020,15 +821,14 @@
     modelBadge.classList.toggle('show', this.value === 'qwen');
   });
 
-  // ── API key persistence ─────────────────────
+  // ── API key persistence ──────────────────────
   const KEY_STORE = 'art-lesson-gen:api-key';
-  try {
-    const saved = localStorage.getItem(KEY_STORE);
-    if (saved) {
-      apiKey.value = saved;
-      btnSaveKey.classList.add('saved');
-    }
-  } catch (_) {}
+  (function () {
+    try {
+      const saved = localStorage.getItem(KEY_STORE);
+      if (saved) { apiKey.value = saved; btnSaveKey.classList.add('saved'); }
+    } catch (_) {}
+  })();
 
   btnSaveKey.addEventListener('click', function () {
     const val = apiKey.value.trim();
@@ -1044,7 +844,7 @@
     showToast('API 密钥已清除');
   });
 
-  // ── Format radio ────────────────────────────
+  // ── Format radio ─────────────────────────────
   formatGroup.addEventListener('click', function (e) {
     const chip = e.target.closest('.radio-chip');
     if (!chip) return;
@@ -1053,48 +853,40 @@
     chip.querySelector('input').checked = true;
   });
 
-  // ── Edit mode toggle ────────────────────────
+  // ── Edit toggle ──────────────────────────────
   toggleEdit.addEventListener('click', function () {
     editMode = !editMode;
     toggleEdit.classList.toggle('on', editMode);
-    if (editMode) {
-      makeResultEditable();
-      showToast('编辑模式已开启，点击教案内容即可修改');
-    } else {
-      makeResultReadonly();
-      showToast('编辑模式已关闭');
-    }
+    if (editMode) { makeEditable(); showToast('编辑模式已开启'); }
+    else { makeReadonly(); showToast('编辑模式已关闭'); }
   });
-
-  function makeResultEditable() {
+  function makeEditable() {
     document.querySelectorAll('.result-section .editable').forEach(function (el) {
       el.setAttribute('contenteditable', 'true');
       el.classList.add('editing');
     });
   }
-  function makeResultReadonly() {
+  function makeReadonly() {
     document.querySelectorAll('.result-section .editable').forEach(function (el) {
       el.setAttribute('contenteditable', 'false');
       el.classList.remove('editing');
     });
   }
 
-  // ── Guide collapsible ───────────────────────
+  // ── Guide toggle ─────────────────────────────
   guideHeader.addEventListener('click', function () {
     guide.classList.toggle('open');
   });
 
-  // ── Upload ──────────────────────────────────
+  // ── Upload ───────────────────────────────────
   uploadZone.addEventListener('click', function (e) {
     if (e.target.closest('#remove-file')) return;
     const input = uploadZone.querySelector('#file-input');
     if (input) input.click();
   });
-
   fileInput.addEventListener('change', function () {
     if (this.files && this.files[0]) handleFile(this.files[0]);
   });
-
   uploadZone.addEventListener('dragover', function (e) {
     e.preventDefault();
     uploadZone.classList.add('drag-over');
@@ -1115,13 +907,6 @@
     uploadedFile = file;
     const reader = new FileReader();
     reader.onload = function (ev) {
-      // 保存图片数据供下载使用
-      var hid = document.getElementById('stored-image-data') || document.createElement('input');
-      hid.type = 'hidden';
-      hid.id = 'stored-image-data';
-      hid.value = ev.target.result;
-      document.body.appendChild(hid);
-
       uploadZone.classList.add('has-image');
       uploadZone.innerHTML =
         '<div class="upload-preview">' +
@@ -1130,7 +915,7 @@
             '<span class="name">' + escHtml(file.name) + '</span>' +
             '<span class="size">' + fmtSize(file.size) + '</span>' +
           '</div>' +
-          '<button class="remove" id="remove-file">移除</button>' +
+          '<button class="remove-btn" id="remove-file">移除</button>' +
         '</div>';
       document.getElementById('remove-file').addEventListener('click', function (ev) {
         ev.stopPropagation();
@@ -1138,14 +923,11 @@
       });
     };
     reader.readAsDataURL(file);
-    checkReady();
   }
 
   window.clearUpload = function () {
     uploadedFile = null;
     fileInput.value = '';
-    var hid = document.getElementById('stored-image-data');
-    if (hid) hid.value = '';
     uploadZone.classList.remove('has-image');
     uploadZone.innerHTML =
       '<svg class="upload-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
@@ -1153,13 +935,12 @@
         '<circle cx="8.5" cy="8.5" r="1.5" />' +
         '<path d="M2 16l4.5-4.5 3 3L14 10l8 8" />' +
       '</svg>' +
-      '<div class="upload-text">拖拽图片到此处，或 <strong>点击选择文件</strong></div>' +
+      '<div class="upload-text">点击上传作品图片</div>' +
       '<div class="upload-hint">JPG / PNG / WebP，最大 20MB</div>' +
       '<input type="file" id="file-input" accept="image/*" hidden />';
     document.getElementById('file-input').addEventListener('change', function () {
       if (this.files && this.files[0]) handleFile(this.files[0]);
     });
-    checkReady();
   };
 
   function escHtml(s) {
@@ -1173,105 +954,181 @@
     return (b / 1048576).toFixed(1) + ' MB';
   }
 
-  function checkReady() {
-    // Topic and image are now both optional — always enable
-    btnGenerate.disabled = false;
-  }
-
-  topicInput.addEventListener('input', checkReady);
-
-  // ── Generate ────────────────────────────────
+  // ── Generate (real API) ─────────────────────
   btnGenerate.addEventListener('click', function () {
     if (btnGenerate.classList.contains('loading')) return;
-
-    resultArea.classList.remove('visible');
-
-    btnGenerate.classList.add('loading');
-    btnGenerate.innerHTML = 'AI 正在生成教案 <span class="loading-dots"><span></span><span></span><span></span></span>';
 
     const topic       = topicInput.value.trim();
     const materials   = document.getElementById('materials').value.trim();
     const prompt      = document.getElementById('creative-prompt').value.trim();
     const classLevel  = document.getElementById('class-level').value.trim();
     const duration    = document.getElementById('duration').value.trim() || '90分钟';
-    const apiKeyVal   = apiKey.value.trim();
-    const modelVal    = modelSelect.value;
-    const modelNames  = { qwen: '通义千问 Qwen-VL (阿里云)', glm: 'GLM-5V-Turbo (智谱AI)', mimo: '小米 MiMo-VL', kimi: 'Kimi-VL (月之暗面)' };
+    const modelName   = modelSelect.options[modelSelect.selectedIndex].text;
+    const key         = apiKey.value.trim();
 
-    function doGenerate(imgData) {
-      fetch('/api/generate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: modelNames[modelVal] || modelNames.qwen,
-          api_key: apiKeyVal,
-          title: topic, level: classLevel, duration: duration,
-          materials: materials, prompt: prompt, image_data: imgData || '',
-        })
-      })
-      .then(function (r) { return r.json(); })
-      .then(function (res) {
-        btnGenerate.classList.remove('loading');
-        btnGenerate.textContent = '生成教案';
-        if (!res.success) { showToast('生成失败：' + (res.error || '未知错误')); return; }
-        lastPlan = res.data;
-        renderResult(res.data);
-        resultArea.classList.add('visible');
-        if (editMode) makeResultEditable();
-      })
-      .catch(function (err) {
-        btnGenerate.classList.remove('loading');
-        btnGenerate.textContent = '生成教案';
-        showToast('请求失败：' + err.message);
-      });
-    }
+    if (!key) { showToast('请先填写 API 密钥'); return; }
 
+    resultArea.classList.remove('visible');
+    btnGenerate.classList.add('loading');
+    btnGenerate.innerHTML = 'AI 正在生成教案 <span class="loading-dots"><span></span><span></span><span></span></span>';
+
+    // 准备图片 base64
+    let imageData = '';
     if (uploadedFile) {
-      var reader = new FileReader();
-      reader.onload = function (ev) { doGenerate(ev.target.result); };
+      const reader = new FileReader();
+      reader.onload = function (ev) {
+        imageData = ev.target.result;
+        doGenerate(topic, materials, prompt, classLevel, duration, modelName, key, imageData);
+      };
       reader.readAsDataURL(uploadedFile);
     } else {
-      doGenerate('');
+      doGenerate(topic, materials, prompt, classLevel, duration, modelName, key, '');
     }
   });
 
+  function doGenerate(topic, materials, prompt, classLevel, duration, modelName, key, imageData) {
+    fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: modelName,
+        api_key: key,
+        title: topic,
+        level: classLevel,
+        duration: duration,
+        materials: materials,
+        prompt: prompt,
+        image_data: imageData
+      })
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (res) {
+      btnGenerate.classList.remove('loading');
+      btnGenerate.textContent = '生成教案';
+
+      if (!res.success) {
+        showToast('生成失败: ' + (res.error || '未知错误'));
+        return;
+      }
+
+      var d = res.data;
+      lastPlan = {
+        title: d.title,
+        level: d.level,
+        duration: d.duration,
+        materials: d.materials,
+        objectives: d.objectives,
+        keyPoints: [d.key_points, d.difficult_points].filter(Boolean),
+        steps: d.process ? d.process.split(/\n(?=\d+[\.\)、])/).filter(Boolean) : [],
+        materialTags: d.materials ? d.materials.split(/[,，、\s]+/).filter(Boolean) : [],
+        // 保留原始数据用于下载
+        _raw: d
+      };
+      renderResult(lastPlan);
+      resultArea.classList.add('visible');
+      if (editMode) makeEditable();
+      resultArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    })
+    .catch(function (err) {
+      btnGenerate.classList.remove('loading');
+      btnGenerate.textContent = '生成教案';
+      showToast('网络错误，请确认服务已启动');
+      console.error(err);
+    });
+  }
   function renderResult(plan) {
     document.getElementById('result-title').textContent = plan.title;
     document.getElementById('result-objectives').textContent = plan.objectives;
-    var points = [];
-    if (plan.key_points) points.push(plan.key_points);
-    if (plan.difficult_points) points.push(plan.difficult_points);
-    document.getElementById('result-key-points').innerHTML = points.map(function(k) { return '<li class="editable">' + k + '</li>'; }).join('');
-
-    var steps = plan.process ? plan.process.split('\n').filter(function(s) { return s.trim(); }) : [];
-    document.getElementById('result-steps').innerHTML = steps.map(function(s) { return '<li class="editable">' + s + '</li>'; }).join('');
-
-    var mats = plan.materials ? plan.materials.split(/[,，、\s]+/).filter(Boolean) : [];
-    document.getElementById('result-material-tags').innerHTML = mats.map(function(t) { return '<span class="tag">' + t + '</span>'; }).join('');
+    document.getElementById('result-key-points').innerHTML = plan.keyPoints.map(k => '<li class="editable">' + k + '</li>').join('');
+    document.getElementById('result-steps').innerHTML = plan.steps.map(s => '<li class="editable">' + s + '</li>').join('');
+    document.getElementById('result-material-tags').innerHTML = plan.materialTags.map(t => '<span class="tag">' + t + '</span>').join('');
   }
 
-  // ── Result actions ──────────────────────────
+  // ── Result actions ───────────────────────────
   document.getElementById('btn-download').addEventListener('click', function () {
-    var plan = lastPlan;
-    if (!plan) { showToast('请先生成教案'); return; }
-    var fmt = formatGroup.querySelector('.radio-chip.selected').dataset.value;
-    var imgData = document.getElementById('stored-image-data') ? document.getElementById('stored-image-data').value : '';
-    fetch('/api/download', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ format: fmt, title: plan.title, level: plan.level, duration: plan.duration, materials: plan.materials, objectives: plan.objectives, key_points: plan.key_points, difficult_points: plan.difficult_points, process: plan.process, extension: '', notes: '', image_data: imgData })
-    })
-    .then(function (r) { return r.blob(); })
-    .then(function (blob) {
-      var a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = '教案文档.' + (fmt === 'pdf' ? 'pdf' : 'docx');
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(a.href);
-    });
+    const fmt = formatGroup.querySelector('.radio-chip.selected').dataset.value;
+    if (!lastPlan) { showToast('请先生成教案'); return; }
+    downloadPlanFile(lastPlan, fmt);
   });
+
+  function downloadPlanFile(plan, format) {
+    var fileName = (document.getElementById('filename').value.trim() || '教案文档');
+
+    // 准备图片 base64
+    var imageData = '';
+    var sendReq = function (img) {
+      var body = {
+        format: format,
+        title: plan._raw.title,
+        level: plan._raw.level,
+        duration: plan._raw.duration,
+        materials: plan._raw.materials,
+        objectives: plan._raw.objectives,
+        key_points: plan._raw.key_points,
+        difficult_points: plan._raw.difficult_points,
+        process: plan._raw.process,
+        extension: plan._raw.extension,
+        notes: plan._raw.notes,
+        image_data: img
+      };
+
+      fetch('/api/download', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      })
+      .then(function (r) {
+        if (!r.ok) throw new Error('下载失败');
+        return r.blob();
+      })
+      .then(function (blob) {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = fileName + '.' + format;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('下载完成');
+      })
+      .catch(function (err) {
+        showToast('下载失败: ' + err.message);
+      });
+    };
+
+    if (uploadedFile) {
+      var reader = new FileReader();
+      reader.onload = function (ev) { sendReq(ev.target.result); };
+      reader.readAsDataURL(uploadedFile);
+    } else {
+      sendReq('');
+    }
+  }
+
+  function buildDocxContent(plan) {
+    return '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>' +
+      plan.title + '</title><style>body{font:16px/1.8 "PingFang SC","Microsoft YaHei",sans-serif;max-width:720px;margin:60px auto;padding:0 40px;color:#2d2a26}h1{font-size:24px;text-align:center;margin-bottom:8px}h2{font-size:16px;color:#8b7b6b;border-bottom:2px solid #d4a574;padding-bottom:6px;margin-top:32px}p,li{color:#3d3833}ul{padding-left:20px}li{margin-bottom:6px}.tag{display:inline-block;background:#f5efe6;color:#a0724a;padding:2px 12px;border-radius:12px;margin:4px 6px 4px 0;font-size:13px}.meta{text-align:center;color:#8b7b6b;font-size:13px;margin-bottom:24px}</style></head><body>' +
+      '<h1>' + escHtml(plan.title) + '</h1>' +
+      '<div class="meta">AI 自动生成 · 美术教案</div>' +
+      '<h2>教学目标</h2><p>' + escHtml(plan.objectives) + '</p>' +
+      '<h2>教学重难点</h2><ul>' + plan.keyPoints.map(function(k){return '<li>'+escHtml(k)+'</li>';}).join('') + '</ul>' +
+      '<h2>教学步骤</h2><ul>' + plan.steps.map(function(s){return '<li>'+escHtml(s)+'</li>';}).join('') + '</ul>' +
+      '<h2>所需材料</h2><div>' + plan.materialTags.map(function(t){return '<span class="tag">'+escHtml(t)+'</span>';}).join('') + '</div>' +
+      '</body></html>';
+  }
+
+  function buildPdfContent(plan) {
+    return '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>' +
+      plan.title + '</title><style>@page{size:A4;margin:2cm}body{font:14px/1.8 "PingFang SC","Microsoft YaHei","SimSun",serif;color:#1a1a1a}h1{font-size:22px;text-align:center;margin-bottom:4px;border-bottom:3px double #333;padding-bottom:12px}h2{font-size:15px;margin-top:28px;padding:4px 0;border-left:4px solid #666;padding-left:12px}p,li{text-align:justify}ul{padding-left:18px}li{margin-bottom:4px}.tag{display:inline-block;border:1px solid #999;padding:1px 10px;margin:3px 4px 3px 0;font-size:12px;border-radius:2px}.meta{text-align:center;color:#666;font-size:12px;margin-bottom:20px}</style></head><body>' +
+      '<h1>' + escHtml(plan.title) + '</h1>' +
+      '<div class="meta">AI 自动生成 · 美术教案</div>' +
+      '<h2>一、教学目标</h2><p>' + escHtml(plan.objectives) + '</p>' +
+      '<h2>二、教学重难点</h2><ul>' + plan.keyPoints.map(function(k){return '<li>'+escHtml(k)+'</li>';}).join('') + '</ul>' +
+      '<h2>三、教学步骤</h2><ul>' + plan.steps.map(function(s){return '<li>'+escHtml(s)+'</li>';}).join('') + '</ul>' +
+      '<h2>四、所需材料</h2><div>' + plan.materialTags.map(function(t){return '<span class="tag">'+escHtml(t)+'</span>';}).join('') + '</div>' +
+      '</body></html>';
+  }
 
   document.getElementById('btn-copy').addEventListener('click', function () {
     const card = document.querySelector('.result-card');
@@ -1288,10 +1145,11 @@
 
   document.getElementById('btn-regenerate').addEventListener('click', function () {
     resultArea.classList.remove('visible');
+    btnGenerate.scrollIntoView({ behavior: 'smooth', block: 'center' });
     setTimeout(function () { btnGenerate.click(); }, 200);
   });
 
-  // ── Toast ───────────────────────────────────
+  // ── Toast ────────────────────────────────────
   let toastTimer;
   function showToast(msg) {
     clearTimeout(toastTimer);
