@@ -41,6 +41,12 @@
 
 ## 🚀 快速开始
 
+### Windows 一键启动（推荐）
+
+下载项目后，**双击 `一键启动教案生成器.bat`**，自动打开浏览器进入教案生成页面。
+
+### 手动启动
+
 ```bash
 # 1. 进入项目
 cd lesson_app
@@ -100,6 +106,7 @@ streamlit run app.py
 lesson_app/
 ├── server.py              # Flask 后端 API（主入口）
 ├── index.html             # Open Design 前端界面
+├── 一键启动教案生成器.bat   # Windows 双击启动
 ├── app.py                 # Streamlit 版本（备用）
 ├── cli.py                 # 命令行版本
 ├── diagnose.py            # 诊断工具
