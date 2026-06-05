@@ -19,7 +19,11 @@
 
 <br />
 
-![应用截图](examples/screenshot.png)
+| 手机版 | 电脑版 |
+|:---:|:---:|
+| ![手机截图](examples/screenshot.png) | ![电脑截图](examples/screenshot_desktop.png) |
+
+**📱 手机和电脑都能用，页面自动适配。**
 
 ## 🌐 在线使用（推荐）
 
