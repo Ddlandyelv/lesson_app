@@ -1,5 +1,20 @@
 # 更新日志
 
+## v1.2.0 (2026-06-05)
+
+### 新增
+
+- **在线部署**：上线 [ddlyl.pythonanywhere.com](https://ddlyl.pythonanywhere.com)，无需安装直接使用
+- **手机端适配**：Open Design 全新移动端页面，折叠式设置面板、底部固定生成按钮
+- **真实 API 对接**：前端直连 Flask 后端 `/api/generate` 和 `/api/download`
+- **永久链接**：PythonAnywhere 免费托管，链接不变，一次部署永久可用
+
+### 变更
+
+- 重构 README.md，新增在线使用入口和使用说明
+- `server.py` 适配云部署（支持 `PORT` 环境变量，生产环境关闭自动打开浏览器）
+- 移除前端 mock 数据，改为真实 API 调用
+
 ## v1.1.1 (2026-05-29)
 
 ### 新增
